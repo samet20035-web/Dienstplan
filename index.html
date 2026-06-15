@@ -155,7 +155,6 @@
 </head>
 <body>
 
-<!-- LOGIN -->
 <div id="loginScreen" class="screen on">
   <div class="lcard">
     <div class="llogo">
@@ -175,11 +174,10 @@
     </div>
     <button class="btn-login" id="loginBtn" onclick="doLogin()">Anmelden & Dienstplan laden</button>
     <div class="lerr" id="loginErr"></div>
-    <p class="lnote">Login direkt bei fahrerauskunft.rnv-online.de<br>Keine Daten werden gespeichert.</p>
+    <p class="lnote">Login direkt bei fahrerauskunft.rnv-online.de<br>Achtung: CORS-Erweiterung wird benötigt!</p>
   </div>
 </div>
 
-<!-- TOPBAR -->
 <div class="topbar" id="topbar" style="display:none">
   <div class="topbar-mark">🚃</div>
   <span class="topbar-name">Perdis</span>
@@ -187,7 +185,6 @@
   <button class="topbar-btn" onclick="doLogout()">Abmelden</button>
 </div>
 
-<!-- MAIN -->
 <div id="mainScreen" class="screen">
   <div class="wrap">
     <div class="monthnav">
@@ -220,7 +217,6 @@
 
 <script>
 // ─── KONFIGURATION ───────────────────────────────────────────────────────────
-const PROXY = "https://corsproxy.io/?url=";
 const BASE  = "https://fahrerauskunft.rnv-online.de/WebComm";
 
 const MONATE  = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
@@ -263,8 +259,7 @@ let S = {
   month: new Date().getMonth(),
   year:  new Date().getFullYear(),
   services: [],
-  rawText: "", rawTitle: "",
-  cookies: ""  // gespeicherte Session-Cookies
+  rawText: "", rawTitle: ""
 };
 
 // ─── HILFSFUNKTIONEN ─────────────────────────────────────────────────────────
@@ -292,24 +287,24 @@ function zeit2min(t) {
 }
 function pad2(n){ return String(n).padStart(2,"0"); }
 
-// ─── PROXY-FETCH ─────────────────────────────────────────────────────────────
+// ─── DIREKTER FETCH (OHNE PROXY) ─────────────────────────────────────────────
 async function pfetch(url, opts={}) {
-  // corsproxy.io umschließt die Anfrage
-  const proxied = PROXY + encodeURIComponent(url);
-  const r = await fetch(proxied, {
+  const r = await fetch(url, {
     method: opts.method || "GET",
     headers: {
       "Content-Type": opts.body ? "application/x-www-form-urlencoded" : undefined,
-      // Cookies über custom header weiterreichen (corsproxy.io unterstützt x-cors-headers)
-      ...(S.cookies ? {"x-cors-cookie": S.cookies} : {}),
       ...(opts.headers||{})
     },
     body: opts.body || undefined,
-    redirect: "follow"
+    redirect: "follow",
+    // WICHTIG: credentials: "include" überträgt die ASP.NET Session-Cookies
+    credentials: "include"
   });
-  // Cookies aus Antwort speichern
-  const sc = r.headers.get("x-cors-cookie") || r.headers.get("set-cookie");
-  if (sc) S.cookies = sc;
+  
+  if (!r.ok) {
+    throw new Error(`Netzwerkfehler: ${r.status}`);
+  }
+  
   return r;
 }
 
@@ -336,7 +331,7 @@ async function doLogin() {
   const user = document.getElementById("inUser").value.trim();
   const pass = document.getElementById("inPass").value;
   if (!user||!pass) { showErr("Bitte Benutzerkennung und Kennwort eingeben."); return; }
-  S.user=user; S.pass=pass; S.cookies="";
+  S.user=user; S.pass=pass;
 
   const btn=document.getElementById("loginBtn");
   btn.disabled=true; btn.textContent="Verbinde…"; hideErr();
@@ -382,13 +377,13 @@ async function doLogin() {
     await loadDienstplan();
 
   } catch(e) {
-    showErr("Verbindungsfehler: "+e.message+". Bitte VPN oder Netzwerk prüfen.");
+    showErr("Verbindungsfehler: "+e.message+". (Ist die CORS-Erweiterung im Browser aktiv?)");
     btn.disabled=false; btn.textContent="Anmelden & Dienstplan laden";
   }
 }
 
 function doLogout() {
-  S = { ...S, services:[], rawText:"", rawTitle:"", cookies:"" };
+  S = { ...S, services:[], rawText:"", rawTitle:"" };
   document.getElementById("topbar").style.display="none";
   document.getElementById("mainScreen").classList.remove("on");
   document.getElementById("loginScreen").classList.add("on");
@@ -405,7 +400,6 @@ async function loadDienstplan() {
 
   try {
     // roster.aspx abrufen (aktueller Monat wird angezeigt)
-    // Für anderen Monat: POST mit CalRoster-Event auf ein Datum im Zielmonat
     const dateStr = `${S.year}-${pad2(S.month+1)}-01`;
 
     let rosterHtml;
@@ -465,15 +459,10 @@ function parseRoster(html, month, year) {
 
     // Dienst?
     if (title.includes("Dienst:") && !title.includes("abwesend")) {
-      // Dienstnummer aus title: "Dienst: 2061027 • ..."
       const m = title.match(/Dienst:\s*(\S+)/);
       const id = m ? m[1] : "";
-      // Zeit aus title
       const tz = title.match(/Zeit:\s*([\d:]+\s*-\s*[\d:]+)/);
       const time = tz ? tz[1].replace(/\s/g,"") : "";
-      // Span-Text
-      const span = td.querySelector("span");
-      const spanTxt = span ? span.textContent.trim() : "";
 
       if (id && day) {
         services.push({ day, id, time, month:pad2(month), year:String(year), absent:false });
@@ -589,14 +578,11 @@ async function showDetail(day, dienstId, dow) {
   document.getElementById("detailBox").scrollIntoView({behavior:"smooth",block:"start"});
 
   try {
-    // shift.aspx für dieses Datum abrufen
-    // Erst roster.aspx für das Datum aufrufen (Navigation)
     const r0 = await pfetch(`${BASE}/roster.aspx`);
     const h0 = await r0.text();
     const d0 = parseHTML(h0);
     const hf0 = getHidden(d0);
 
-    // Auf Datum navigieren
     const navPayload = buildForm({
       ...hf0,
       "__EVENTTARGET": "ctl00$ctl00$cntMainBody$calRoster",
@@ -604,7 +590,6 @@ async function showDetail(day, dienstId, dow) {
     });
     await pfetch(`${BASE}/roster.aspx`, { method:"POST", body:navPayload });
 
-    // shift.aspx abrufen
     const rShift = await pfetch(`${BASE}/shift.aspx?${dateStr}`);
     const hShift = await rShift.text();
 
@@ -637,7 +622,6 @@ function parseShift(html, dienstId, dow) {
     rows.push({ vonZeit:c[1], vonOrt:c[2], bisZeit:c[3], bisOrt:c[4], linie:c[6], umlauf:c[8], art:c[9] });
   });
 
-  // Gruppieren: Wendezeit ignorieren, Pause trennt Umläufe
   const result = [];
   let curUml=null, ersteF=null, letzteF=null;
 
