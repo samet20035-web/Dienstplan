@@ -3,676 +3,241 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RNV Dienstplan</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%2300254C'/><text y='.9em' font-size='70' x='15'>🚃</text></svg>">
+<title>Perdis – RNV Dienstplan</title>
 <style>
   :root {
-    --rnv-blue: #00254C;
-    --rnv-orange: #EE7202;
-    --rnv-blue-light: #003b78;
-    --rnv-orange-light: #ff8c1a;
-    --white: #ffffff;
-    --surface: #f4f7fb;
-    --surface2: #e8eef7;
-    --text-primary: #00254C;
-    --text-secondary: #4a6080;
-    --text-muted: #8099b3;
-    --border: #d0dae8;
-    --border-light: #e8eef7;
-    --success: #1a7a3c;
-    --danger: #c0392b;
-    --radius: 10px;
-    --radius-lg: 16px;
+    --blue: #00254C;
+    --blue2: #003b78;
+    --orange: #EE7202;
+    --orange2: #ff8c1a;
+    --white: #fff;
+    --surface: #f2f5fa;
+    --surface2: #e4eaf4;
+    --text: #00254C;
+    --text2: #3a5570;
+    --muted: #7a95b0;
+    --border: #cdd8e8;
+    --success: #176b38;
+    --danger: #b8291e;
+    --r: 10px;
+    --rl: 14px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: var(--surface);
-    color: var(--text-primary);
-    min-height: 100vh;
-  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--surface); color: var(--text); min-height: 100vh; }
 
-  /* HEADER */
-  .header {
-    background: var(--rnv-blue);
-    padding: 0 24px;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .logo-mark {
-    width: 32px; height: 32px;
-    background: var(--rnv-orange);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
-    flex-shrink: 0;
-  }
-  .header-title {
-    color: white;
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-  }
-  .header-sub {
-    color: rgba(255,255,255,0.5);
-    font-size: 12px;
-    margin-left: auto;
-  }
-  .logout-btn {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.2);
-    color: white;
-    border-radius: 6px;
-    padding: 5px 12px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: background 0.15s;
-  }
-  .logout-btn:hover { background: rgba(255,255,255,0.18); }
+  /* ─── HEADER ─── */
+  .topbar { background: var(--blue); height: 52px; display: flex; align-items: center; padding: 0 16px; gap: 10px; position: sticky; top: 0; z-index: 50; }
+  .topbar-mark { width: 30px; height: 30px; background: var(--orange); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .topbar-name { color: #fff; font-weight: 700; font-size: 15px; letter-spacing: -.2px; }
+  .topbar-user { color: rgba(255,255,255,.5); font-size: 12px; margin-left: auto; }
+  .topbar-btn { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); color: #fff; border-radius: 6px; padding: 4px 11px; font-size: 12px; cursor: pointer; }
+  .topbar-btn:hover { background: rgba(255,255,255,.18); }
 
-  /* SCREENS */
+  /* ─── SCREENS ─── */
   .screen { display: none; }
-  .screen.active { display: block; }
+  .screen.on { display: block; }
 
-  /* LOGIN */
-  #loginScreen {
-    min-height: 100vh;
-    background: var(--rnv-blue);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-  }
-  #loginScreen.active { display: flex; }
-  .login-card {
-    background: white;
-    border-radius: var(--radius-lg);
-    padding: 36px 32px;
-    width: 100%;
-    max-width: 360px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-  }
-  .login-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 28px;
-  }
-  .login-logo-mark {
-    width: 40px; height: 40px;
-    background: var(--rnv-orange);
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-  }
-  .login-logo-text {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--rnv-blue);
-    letter-spacing: -0.5px;
-  }
-  .login-logo-sub {
-    font-size: 11px;
-    color: var(--text-muted);
-    font-weight: 400;
-  }
-  .field { margin-bottom: 16px; }
-  .field label {
-    display: block;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    margin-bottom: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .field input {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius);
-    font-size: 14px;
-    color: var(--text-primary);
-    transition: border-color 0.15s;
-    outline: none;
-    font-family: inherit;
-  }
-  .field input:focus { border-color: var(--rnv-orange); }
-  .btn-primary {
-    width: 100%;
-    background: var(--rnv-blue);
-    color: white;
-    border: none;
-    border-radius: var(--radius);
-    padding: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s;
-    margin-top: 8px;
-    font-family: inherit;
-  }
-  .btn-primary:hover { background: var(--rnv-blue-light); }
-  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-  .login-note {
-    font-size: 11px;
-    color: var(--text-muted);
-    text-align: center;
-    margin-top: 16px;
-    line-height: 1.5;
-  }
-  .error-msg {
-    background: #fff0f0;
-    border: 1px solid #ffcccc;
-    color: var(--danger);
-    border-radius: var(--radius);
-    padding: 10px 14px;
-    font-size: 13px;
-    margin-top: 12px;
-    display: none;
-  }
-  .error-msg.show { display: block; }
+  /* ─── LOGIN ─── */
+  #loginScreen.on { display: flex; min-height: 100vh; background: var(--blue); align-items: center; justify-content: center; padding: 20px; }
+  .lcard { background: #fff; border-radius: var(--rl); padding: 32px 28px; width: 100%; max-width: 340px; }
+  .llogo { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
+  .llogo-mark { width: 38px; height: 38px; background: var(--orange); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .llogo-title { font-size: 19px; font-weight: 700; color: var(--blue); }
+  .llogo-sub { font-size: 11px; color: var(--muted); }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 11px; font-weight: 600; color: var(--text2); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .4px; }
+  .field input { width: 100%; padding: 9px 13px; border: 1.5px solid var(--border); border-radius: var(--r); font-size: 14px; color: var(--text); outline: none; font-family: inherit; transition: border-color .15s; }
+  .field input:focus { border-color: var(--orange); }
+  .btn-login { width: 100%; background: var(--blue); color: #fff; border: none; border-radius: var(--r); padding: 11px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 6px; font-family: inherit; }
+  .btn-login:hover { background: var(--blue2); }
+  .btn-login:disabled { opacity: .5; cursor: not-allowed; }
+  .lerr { background: #fff0f0; border: 1px solid #ffcaca; color: var(--danger); border-radius: var(--r); padding: 9px 13px; font-size: 12px; margin-top: 12px; display: none; }
+  .lerr.on { display: block; }
+  .lnote { font-size: 11px; color: var(--muted); text-align: center; margin-top: 14px; line-height: 1.5; }
 
-  /* MAIN */
-  #mainScreen { display: none; }
-  #mainScreen.active { display: block; }
+  /* ─── MAIN ─── */
+  .wrap { max-width: 720px; margin: 0 auto; padding: 20px 14px 40px; }
 
-  .container { max-width: 760px; margin: 0 auto; padding: 24px 16px; }
+  .monthnav { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .month-title { font-size: 19px; font-weight: 700; color: var(--blue); letter-spacing: -.3px; flex: 1; text-align: center; }
+  .mnbtn { background: #fff; border: 1.5px solid var(--border); border-radius: 8px; width: 34px; height: 34px; cursor: pointer; font-size: 15px; color: var(--text2); display: flex; align-items: center; justify-content: center; transition: border-color .12s, color .12s; }
+  .mnbtn:hover { border-color: var(--orange); color: var(--orange); }
 
-  /* MONTH NAV */
-  .month-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
-  .month-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--rnv-blue);
-    letter-spacing: -0.3px;
-  }
-  .nav-btn {
-    background: white;
-    border: 1.5px solid var(--border);
-    border-radius: 8px;
-    width: 36px; height: 36px;
-    cursor: pointer;
-    font-size: 16px;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--text-secondary);
-    transition: all 0.15s;
-  }
-  .nav-btn:hover { border-color: var(--rnv-orange); color: var(--rnv-orange); }
+  /* ─── STATS ─── */
+  .stats { display: flex; gap: 10px; margin-bottom: 16px; }
+  .stat { flex: 1; background: #fff; border: 1px solid var(--border); border-radius: var(--r); padding: 10px 14px; text-align: center; }
+  .stat-val { font-size: 20px; font-weight: 700; color: var(--blue); line-height: 1; }
+  .stat-val.o { color: var(--orange); }
+  .stat-lbl { font-size: 10px; color: var(--muted); margin-top: 3px; text-transform: uppercase; letter-spacing: .4px; }
 
-  /* STATS BAR */
-  .stats-bar {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-  .stat-card {
-    flex: 1;
-    background: white;
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius);
-    padding: 12px 16px;
-    text-align: center;
-  }
-  .stat-value {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--rnv-blue);
-    line-height: 1;
-  }
-  .stat-label {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-  }
-  .stat-card.orange .stat-value { color: var(--rnv-orange); }
-
-  /* CALENDAR GRID */
-  .calendar {
-    background: white;
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    margin-bottom: 24px;
-  }
-  .cal-header {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    background: var(--rnv-blue);
-  }
-  .cal-weekday {
-    text-align: center;
-    padding: 10px 4px;
-    font-size: 11px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.7);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .cal-weekday.weekend { color: rgba(238,114,2,0.85); }
-  .cal-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 0;
-  }
-  .cal-day {
-    min-height: 56px;
-    padding: 6px;
-    border-right: 1px solid var(--border-light);
-    border-bottom: 1px solid var(--border-light);
-    position: relative;
-    cursor: default;
-  }
+  /* ─── CALENDAR ─── */
+  .cal { background: #fff; border: 1px solid var(--border); border-radius: var(--rl); overflow: hidden; margin-bottom: 20px; }
+  .cal-head { display: grid; grid-template-columns: repeat(7, 1fr); background: var(--blue); }
+  .cal-wd { text-align: center; padding: 9px 2px; font-size: 10px; font-weight: 600; color: rgba(255,255,255,.65); text-transform: uppercase; letter-spacing: .4px; }
+  .cal-wd.we { color: rgba(238,114,2,.9); }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+  .cal-day { min-height: 52px; padding: 5px; border-right: 1px solid #edf1f8; border-bottom: 1px solid #edf1f8; }
   .cal-day:nth-child(7n) { border-right: none; }
-  .cal-day.empty { background: var(--surface); }
-  .cal-day.weekend:not(.empty) { background: #fefaf5; }
-  .cal-day.today { background: #f0f6ff; }
-  .cal-day.has-dienst {
-    cursor: pointer;
-    transition: background 0.1s;
-  }
-  .cal-day.has-dienst:hover { background: #fff5eb; }
-  .day-num {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    line-height: 1;
-  }
-  .cal-day.today .day-num {
-    background: var(--rnv-blue);
-    color: white;
-    width: 20px; height: 20px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px;
-  }
-  .dienst-chip {
-    margin-top: 4px;
-    background: var(--rnv-orange);
-    color: white;
-    border-radius: 5px;
-    padding: 2px 5px;
-    font-size: 10px;
-    font-weight: 600;
-    display: inline-block;
-    line-height: 1.4;
-  }
-  .dienst-time {
-    font-size: 9px;
-    color: var(--text-muted);
-    margin-top: 2px;
-  }
+  .cal-day.empty { background: #f8fafd; }
+  .cal-day.we { background: #fefbf5; }
+  .cal-day.today { background: #eef4ff; }
+  .cal-day.clickable { cursor: pointer; }
+  .cal-day.clickable:hover { background: #fff5e8; }
+  .dnum { font-size: 11px; font-weight: 500; color: var(--text2); line-height: 1; }
+  .today .dnum { background: var(--blue); color: #fff; width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; }
+  .chip { margin-top: 3px; background: var(--orange); color: #fff; border-radius: 4px; padding: 2px 4px; font-size: 9.5px; font-weight: 700; display: block; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .chip-time { font-size: 8.5px; color: var(--muted); margin-top: 1px; }
+  .chip-abs { background: var(--surface2); color: var(--muted); font-size: 9px; padding: 1px 4px; border-radius: 3px; margin-top: 2px; display: block; }
 
-  /* LOADING */
-  .loading-state {
-    text-align: center;
-    padding: 60px 24px;
-  }
-  .spinner {
-    width: 36px; height: 36px;
-    border: 3px solid var(--border);
-    border-top-color: var(--rnv-orange);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    margin: 0 auto 16px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .loading-text { color: var(--text-secondary); font-size: 14px; }
-  .loading-sub { color: var(--text-muted); font-size: 12px; margin-top: 6px; }
+  /* ─── SPINNER ─── */
+  .spin-wrap { text-align: center; padding: 48px 16px; }
+  .spin { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--orange); border-radius: 50%; animation: sp .7s linear infinite; margin: 0 auto 12px; }
+  @keyframes sp { to { transform: rotate(360deg); } }
+  .spin-txt { color: var(--text2); font-size: 13px; }
+  .spin-sub { color: var(--muted); font-size: 11px; margin-top: 4px; }
 
-  /* DETAIL PANEL */
-  .detail-panel {
-    background: white;
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    display: none;
-  }
-  .detail-panel.show { display: block; }
-  .detail-header {
-    background: var(--rnv-blue);
-    padding: 16px 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .detail-icon {
-    background: var(--rnv-orange);
-    width: 36px; height: 36px;
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
-    flex-shrink: 0;
-  }
-  .detail-title {
-    color: white;
-    font-size: 16px;
-    font-weight: 700;
-  }
-  .detail-sub {
-    color: rgba(255,255,255,0.6);
-    font-size: 12px;
-    margin-top: 2px;
-  }
-  .detail-close {
-    margin-left: auto;
-    background: rgba(255,255,255,0.15);
-    border: none;
-    color: white;
-    width: 28px; height: 28px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 16px;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .detail-close:hover { background: rgba(255,255,255,0.25); }
-  .detail-body { padding: 20px; }
+  /* ─── DETAIL ─── */
+  .detail { background: #fff; border: 1px solid var(--border); border-radius: var(--rl); display: none; overflow: hidden; }
+  .detail.on { display: block; }
+  .dhead { background: var(--blue); padding: 14px 16px; display: flex; align-items: center; gap: 10px; }
+  .dhead-ico { background: var(--orange); width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+  .dhead-title { color: #fff; font-size: 15px; font-weight: 700; }
+  .dhead-sub { color: rgba(255,255,255,.6); font-size: 11px; margin-top: 1px; }
+  .dhead-close { margin-left: auto; background: rgba(255,255,255,.15); border: none; color: #fff; width: 26px; height: 26px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+  .dbody { padding: 16px; }
 
-  /* UMLAUF CARDS */
-  .umlauf-list { display: flex; flex-direction: column; gap: 12px; }
-  .umlauf-card {
-    border: 1.5px solid var(--border-light);
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
-  .umlauf-header {
-    background: var(--surface);
-    padding: 8px 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border-bottom: 1px solid var(--border-light);
-  }
-  .umlauf-nr {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--rnv-orange);
-    letter-spacing: 0.3px;
-  }
-  .umlauf-linie {
-    background: var(--rnv-blue);
-    color: white;
-    border-radius: 4px;
-    padding: 2px 7px;
-    font-size: 11px;
-    font-weight: 700;
-  }
-  .umlauf-body { padding: 12px 14px; }
-  .stop-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 6px 0;
-  }
-  .stop-row + .stop-row {
-    border-top: 1px dashed var(--border-light);
-  }
-  .stop-time {
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--rnv-blue);
-    min-width: 44px;
-    letter-spacing: 0.3px;
-  }
-  .stop-arrow { color: var(--text-muted); font-size: 12px; }
-  .stop-code {
-    font-family: monospace;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    background: var(--surface2);
-    padding: 2px 7px;
-    border-radius: 4px;
-    letter-spacing: 1px;
-  }
-  .stop-name { font-size: 12px; color: var(--text-muted); flex: 1; }
-  .stop-row.start .stop-time { color: var(--success); }
-  .stop-row.end .stop-time { color: var(--rnv-orange); }
-  .pause-badge {
-    text-align: center;
-    padding: 6px;
-    font-size: 11px;
-    color: var(--text-muted);
-    border-top: 1px dashed var(--border);
-    margin-top: 4px;
-  }
+  /* Umlauf-Karten */
+  .ulist { display: flex; flex-direction: column; gap: 10px; }
+  .ucard { border: 1.5px solid var(--border); border-radius: var(--r); overflow: hidden; }
+  .ucard-head { background: var(--surface); padding: 7px 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .unr { font-size: 11px; font-weight: 700; color: var(--orange); }
+  .ulinie { background: var(--blue); color: #fff; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 700; }
+  .ubody { padding: 10px 12px; }
+  .srow { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+  .srow + .srow { border-top: 1px dashed #e4eaf4; }
+  .stime { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; font-weight: 700; color: var(--blue); min-width: 40px; }
+  .srow.s .stime { color: var(--success); }
+  .srow.e .stime { color: var(--orange); }
+  .sarr { color: var(--muted); font-size: 11px; }
+  .scode { font-family: monospace; font-size: 11px; font-weight: 700; background: var(--surface2); padding: 1px 6px; border-radius: 4px; letter-spacing: .8px; color: var(--text2); }
+  .sname { font-size: 11px; color: var(--muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pause-badge { text-align: center; padding: 5px; font-size: 10px; color: var(--muted); border-top: 1px dashed var(--border); margin-top: 2px; }
 
-  /* GESAMTZEIT */
-  .total-time {
-    background: var(--rnv-blue);
-    color: white;
-    border-radius: var(--radius);
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 16px;
-  }
-  .total-label { font-size: 12px; color: rgba(255,255,255,0.65); }
-  .total-value { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
-  .total-range { font-size: 13px; color: rgba(255,255,255,0.8); font-family: monospace; }
+  .total { background: var(--blue); color: #fff; border-radius: var(--r); padding: 11px 14px; display: flex; align-items: center; justify-content: space-between; margin-top: 14px; }
+  .total-lbl { font-size: 11px; color: rgba(255,255,255,.6); }
+  .total-range { font-family: monospace; font-size: 12px; color: rgba(255,255,255,.85); margin-top: 2px; }
+  .total-val { font-size: 15px; font-weight: 700; }
 
-  /* ACTION BUTTONS */
-  .action-row {
-    display: flex;
-    gap: 10px;
-    margin-top: 16px;
-    flex-wrap: wrap;
-  }
-  .btn-action {
-    flex: 1;
-    min-width: 120px;
-    padding: 10px 16px;
-    border-radius: var(--radius);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    font-family: inherit;
-    transition: all 0.15s;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-  }
-  .btn-notiz {
-    background: var(--rnv-orange);
-    color: white;
-  }
-  .btn-notiz:hover { background: var(--rnv-orange-light); }
-  .btn-kopieren {
-    background: var(--surface2);
-    color: var(--text-primary);
-    border: 1px solid var(--border);
-  }
-  .btn-kopieren:hover { background: var(--surface); }
-  .btn-ios {
-    background: #1c1c1e;
-    color: white;
-  }
-  .btn-ios:hover { background: #2c2c2e; }
+  .acts { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .abtn { flex: 1; min-width: 100px; padding: 9px 12px; border-radius: var(--r); font-size: 12px; font-weight: 600; cursor: pointer; border: none; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 5px; }
+  .abtn.note { background: var(--orange); color: #fff; }
+  .abtn.note:hover { background: var(--orange2); }
+  .abtn.copy { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .abtn.copy:hover { background: var(--surface); }
+  .abtn.ios { background: #1c1c1e; color: #fff; }
 
-  /* TOAST */
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: var(--rnv-blue);
-    color: white;
-    padding: 10px 20px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 500;
-    transition: transform 0.3s ease;
-    z-index: 1000;
-    white-space: nowrap;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-  }
-  .toast.show { transform: translateX(-50%) translateY(0); }
+  .raw { font-family: 'SF Mono','Fira Code',monospace; font-size: 11.5px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 12px; white-space: pre; overflow-x: auto; color: var(--text); line-height: 1.65; margin-top: 12px; }
 
-  /* EMPTY STATE */
-  .empty-state {
-    text-align: center;
-    padding: 40px 24px;
-  }
-  .empty-icon { font-size: 40px; margin-bottom: 12px; }
-  .empty-title { font-size: 15px; font-weight: 600; color: var(--text-secondary); }
-  .empty-sub { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(70px); background: var(--blue); color: #fff; padding: 8px 18px; border-radius: 18px; font-size: 12px; font-weight: 500; transition: transform .28s; z-index: 999; white-space: nowrap; pointer-events: none; }
+  .toast.on { transform: translateX(-50%) translateY(0); }
 
-  /* RAW TEXT */
-  .raw-text {
-    font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
-    font-size: 12px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px;
-    white-space: pre;
-    overflow-x: auto;
-    color: var(--text-primary);
-    line-height: 1.6;
-    margin-top: 12px;
-  }
+  .empty { text-align: center; padding: 36px 16px; }
+  .empty-ico { font-size: 36px; margin-bottom: 10px; }
+  .empty-title { font-size: 14px; font-weight: 600; color: var(--text2); }
+  .empty-sub { font-size: 12px; color: var(--muted); margin-top: 5px; }
 
-  @media (max-width: 500px) {
-    .stats-bar { gap: 8px; }
-    .stat-card { padding: 10px 12px; }
-    .stat-value { font-size: 18px; }
-    .cal-day { min-height: 44px; }
-    .dienst-chip { font-size: 9px; }
-    .action-row { flex-direction: column; }
+  @media (max-width: 480px) {
+    .stats { gap: 6px; } .stat { padding: 8px 10px; } .stat-val { font-size: 17px; }
+    .acts { flex-direction: column; }
+    .chip { font-size: 8.5px; }
   }
 </style>
 </head>
 <body>
 
 <!-- LOGIN -->
-<div id="loginScreen" class="screen active">
-  <div class="login-card">
-    <div class="login-logo">
-      <div class="login-logo-mark">🚃</div>
+<div id="loginScreen" class="screen on">
+  <div class="lcard">
+    <div class="llogo">
+      <div class="llogo-mark">🚃</div>
       <div>
-        <div class="login-logo-text">Perdis</div>
-        <div class="login-logo-sub">RNV Dienstplan-Übersicht</div>
+        <div class="llogo-title">Perdis</div>
+        <div class="llogo-sub">RNV Dienstplan-Übersicht</div>
       </div>
     </div>
     <div class="field">
-      <label>Benutzername</label>
-      <input type="text" id="usernameInput" placeholder="Dein RNV-Login" autocomplete="username" />
+      <label>Benutzerkennung</label>
+      <input type="text" id="inUser" placeholder="z. B. aslan" autocomplete="username" />
     </div>
     <div class="field">
-      <label>Passwort</label>
-      <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="current-password" />
+      <label>Kennwort</label>
+      <input type="password" id="inPass" placeholder="••••••••" autocomplete="current-password" />
     </div>
-    <button class="btn-primary" id="loginBtn" onclick="doLogin()">Dienstplan laden</button>
-    <div class="error-msg" id="loginError"></div>
-    <p class="login-note">Deine Daten werden nur für den direkten Login bei<br>fahrerauskunft.rnv-online.de verwendet.</p>
+    <button class="btn-login" id="loginBtn" onclick="doLogin()">Anmelden & Dienstplan laden</button>
+    <div class="lerr" id="loginErr"></div>
+    <p class="lnote">Login direkt bei fahrerauskunft.rnv-online.de<br>Keine Daten werden gespeichert.</p>
   </div>
 </div>
 
-<!-- HEADER (hidden until logged in) -->
-<div class="header" id="mainHeader" style="display:none;">
-  <div class="logo-mark">🚃</div>
-  <div class="header-title">Perdis</div>
-  <span class="header-sub" id="headerUser"></span>
-  <button class="logout-btn" onclick="doLogout()">Abmelden</button>
+<!-- TOPBAR -->
+<div class="topbar" id="topbar" style="display:none">
+  <div class="topbar-mark">🚃</div>
+  <span class="topbar-name">Perdis</span>
+  <span class="topbar-user" id="topUser"></span>
+  <button class="topbar-btn" onclick="doLogout()">Abmelden</button>
 </div>
 
 <!-- MAIN -->
 <div id="mainScreen" class="screen">
-  <div class="container">
-
-    <!-- MONTH NAV -->
-    <div class="month-nav">
-      <button class="nav-btn" onclick="changeMonth(-1)">◀</button>
+  <div class="wrap">
+    <div class="monthnav">
+      <button class="mnbtn" onclick="changeMonth(-1)">◀</button>
       <div class="month-title" id="monthTitle">—</div>
-      <button class="nav-btn" onclick="changeMonth(+1)">▶</button>
+      <button class="mnbtn" onclick="changeMonth(1)">▶</button>
     </div>
-
-    <!-- STATS -->
-    <div class="stats-bar" id="statsBar" style="display:none;">
-      <div class="stat-card">
-        <div class="stat-value" id="statCount">0</div>
-        <div class="stat-label">Dienste</div>
-      </div>
-      <div class="stat-card orange">
-        <div class="stat-value" id="statStunden">0h</div>
-        <div class="stat-label">Planzeit</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="statNaechster">—</div>
-        <div class="stat-label">Nächster</div>
-      </div>
+    <div class="stats" id="statsRow" style="display:none">
+      <div class="stat"><div class="stat-val" id="stCount">0</div><div class="stat-lbl">Dienste</div></div>
+      <div class="stat"><div class="stat-val o" id="stH">—</div><div class="stat-lbl">Planzeit</div></div>
+      <div class="stat"><div class="stat-val" id="stNext">—</div><div class="stat-lbl">Nächster</div></div>
     </div>
-
-    <!-- CALENDAR -->
-    <div class="calendar" id="calendarContainer">
-      <div class="loading-state">
-        <div class="spinner"></div>
-        <div class="loading-text">Dienstplan wird geladen…</div>
-        <div class="loading-sub">Verbinde mit RNV WebComm</div>
+    <div class="cal" id="calBox">
+      <div class="spin-wrap"><div class="spin"></div><div class="spin-txt">Dienstplan wird geladen…</div><div class="spin-sub">Verbinde mit RNV WebComm</div></div>
+    </div>
+    <div class="detail" id="detailBox">
+      <div class="dhead">
+        <div class="dhead-ico">🚋</div>
+        <div><div class="dhead-title" id="dTitle">Dienst</div><div class="dhead-sub" id="dSub">—</div></div>
+        <button class="dhead-close" onclick="closeDetail()">✕</button>
+      </div>
+      <div class="dbody" id="dBody">
+        <div class="spin-wrap"><div class="spin"></div><div class="spin-txt">Lade Details…</div></div>
       </div>
     </div>
-
-    <!-- DETAIL PANEL -->
-    <div class="detail-panel" id="detailPanel">
-      <div class="detail-header">
-        <div class="detail-icon">🚋</div>
-        <div>
-          <div class="detail-title" id="detailTitle">Dienst</div>
-          <div class="detail-sub" id="detailSub">Lade Details…</div>
-        </div>
-        <button class="detail-close" onclick="closeDetail()">✕</button>
-      </div>
-      <div class="detail-body" id="detailBody">
-        <div class="loading-state">
-          <div class="spinner"></div>
-          <div class="loading-text">Lade Umlauf-Details…</div>
-        </div>
-      </div>
-    </div>
-
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-const BASE_URL = "https://fahrerauskunft.rnv-online.de/WebComm";
-const CORS_PROXY = "https://corsproxy.io/?url=";
+// ─── KONFIGURATION ───────────────────────────────────────────────────────────
+const PROXY = "https://corsproxy.io/?url=";
+const BASE  = "https://fahrerauskunft.rnv-online.de/WebComm";
 
-const WOCHENTAG = ["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"];
-const WOCHENTAG_KURZ = ["Mo","Di","Mi","Do","Fr","Sa","So"];
-const MONATE = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+const MONATE  = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+const WKTAG   = ["Mo","Di","Mi","Do","Fr","Sa","So"];
+const WKLONG  = ["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"];
 
 const STOPS = {
-  "Bth. HD Bergheim":"BHBE","Bth HD Bergheim":"BHBE",
-  "Bismarckplatz":"BHBP","Betriebshof":"BHBH",
-  "Bth. HD Betriebshof":"BHBH","Bth HD Betriebshof":"BHBH",
-  "Kirchheim Friedhof":"KHFH","Heiligenbergschule":"HHHS",
-  "Hans-Thoma-Platz":"HHHT","Rohrbach Süd":"RSRS",
-  "HD Hauptbahnhof":"BHHF","Campus Bergheim":"BHCA",
+  "Bth. HD Bergheim":"BHBE","Bth HD Bergheim":"BHBE","Bth. HD Betriebshof":"BHBH",
+  "Bth HD Betriebshof":"BHBH","Betriebshof":"BHBH","Bismarckplatz":"BHBP",
+  "Kirchheim Friedhof":"KHFH","Heiligenbergschule":"HHHS","Hans-Thoma-Platz":"HHHT",
+  "Rohrbach Süd":"RSRS","HD Hauptbahnhof":"BHHF","Campus Bergheim":"BHCA",
   "Bth. Wieblinger Weg":"BHWI","S-Bhf Weststadt/Südstadt":"WSBF",
-  "Campus Im Neuenheimer Feld":"NFCN","Zoo":"NFZO",
-  "Schwimmbad":"NFSB","Kopfklinik":"NFKO","Jugendherberge":"NFJH",
-  "S-Bhf Schlierbach/Ziegelhausen":"SBBF","S-Bhf Orthopädie":"SBOK",
-  "S-Bhf Kirchheim/Rohrbach":"KHBF","Kirchheim Rathaus":"KHRH",
-  "Kirchheimer Hof":"KHKH","Hagellachstraße":"KHHS",
-  "Kirchheimer Straße":"EHKS","Heiligenberg":"HHBG",
-  "Heiligenbergstraße":"HHHB","Johann-Fischer-Str.":"HHJF",
+  "Campus Im Neuenheimer Feld":"NFCN","Zoo":"NFZO","Schwimmbad":"NFSB",
+  "Kopfklinik":"NFKO","Jugendherberge":"NFJH","S-Bhf Schlierbach/Ziegelhausen":"SBBF",
+  "S-Bhf Orthopädie":"SBOK","S-Bhf Kirchheim/Rohrbach":"KHBF","Kirchheim Rathaus":"KHRH",
+  "Kirchheimer Hof":"KHKH","Hagellachstraße":"KHHS","Kirchheimer Straße":"EHKS",
+  "Heiligenberg":"HHBG","Heiligenbergstraße":"HHHB","Johann-Fischer-Str.":"HHJF",
   "Tiefburg":"HHTG","Turnerbrunnen":"HHTB","Mühltalstraße":"HHMS",
   "Rohrbach Markt":"RBMA","Rohrbach Kirche":"RBKI","Rohrbach Friedhof":"RBFR",
   "Rohrbach Rathaus":"RBRH","Rohrbach NVZ":"RBNV","Sickingenplatz":"RBSP",
@@ -684,555 +249,554 @@ const STOPS = {
   "Leimen Friedhof":"LEFH","Leimen Georgi-Marktplatz":"LEGP","Leimen Kurpfalz-Centrum":"LEKC"
 };
 
-const ENDSTELLEN = {
-  "21": {"mo_fr":["HHHT","SRBF"],"wende":["HHHT","BHBP"]},
-  "22": {"mo_fr":["BHBP","EHKS"],"wende":["BHBP","EHKS"]},
-  "23": {"mo_fr":["BHBP","LEFH"],"wende":["BHBP","LEFH"]},
-  "24": {"mo_fr":["RSRS","HHHS"],"wende":["RSRS","HHHS"]},
-  "26": {"mo_fr":["KHFH","HHHS"],"wende":["KHFH","HHHS"]},
+const ENDST = {
+  "21": {wt:["HHHT","SRBF"], we:["HHHT","BHBP"]},
+  "22": {wt:["BHBP","EHKS"], we:["BHBP","EHKS"]},
+  "23": {wt:["BHBP","LEFH"], we:["BHBP","LEFH"]},
+  "24": {wt:["RSRS","HHHS"], we:["RSRS","HHHS"]},
+  "26": {wt:["KHFH","HHHS"], we:["KHFH","HHHS"]},
 };
 
-let state = {
-  username: "", password: "", loggedIn: false,
-  currentMonth: new Date().getMonth(),
-  currentYear: new Date().getFullYear(),
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let S = {
+  user:"", pass:"",
+  month: new Date().getMonth(),
+  year:  new Date().getFullYear(),
   services: [],
-  selectedDienst: null,
-  cookies: ""
+  rawText: "", rawTitle: "",
+  cookies: ""  // gespeicherte Session-Cookies
 };
 
-function ortZuKuerzel(name) {
-  name = (name || "").trim().replace(/\u00a0/g,"");
-  if (!name) return "????";
-  if (STOPS[name]) return STOPS[name];
-  const nl = name.toLowerCase();
-  for (const [k,v] of Object.entries(STOPS)) {
-    if (k.toLowerCase().includes(nl) || nl.includes(k.toLowerCase())) return v;
-  }
-  const letters = name.toUpperCase().replace(/[^A-Z]/g,"");
-  return (letters.slice(0,4) || "????").padEnd(4,"?");
+// ─── HILFSFUNKTIONEN ─────────────────────────────────────────────────────────
+function ort2kuerzel(n) {
+  n = (n||"").trim().replace(/\u00a0/g,"");
+  if (!n) return "????";
+  if (STOPS[n]) return STOPS[n];
+  for (const [k,v] of Object.entries(STOPS))
+    if (k.toLowerCase().includes(n.toLowerCase()) || n.toLowerCase().includes(k.toLowerCase())) return v;
+  const L = n.toUpperCase().replace(/[^A-Z]/g,"");
+  return L.slice(0,4).padEnd(4,"?") || "????";
 }
 
-function gegenEndstelle(linie, vonCode, dow) {
-  const info = ENDSTELLEN[linie];
-  if (!info) return null;
-  const key = dow >= 5 ? "wende" : "mo_fr";
-  const [a,b] = info[key];
-  if (vonCode === a) return b;
-  if (vonCode === b) return a;
-  return null;
+function gegenEnd(linie, von, dow) {
+  const i = ENDST[linie]; if (!i) return null;
+  const [a,b] = dow>=5 ? i.we : i.wt;
+  if (von===a) return b; if (von===b) return a; return null;
 }
 
-function zeitZuMinuten(t) {
-  if (!t || t === "-") return 0;
-  const [h,m] = t.split(":").map(Number);
-  return h*60 + m;
+function min2str(m) {
+  if (m<0) m+=1440; const h=Math.floor(m/60); return `${h}h${String(m%60).padStart(2,"0")}min`;
 }
-
-function minutenZuDauer(m) {
-  if (m < 0) m += 24*60;
-  const h = Math.floor(m/60), min = m%60;
-  return `${h}h${String(min).padStart(2,"0")}min`;
+function zeit2min(t) {
+  if (!t||t==="-") return 0; const [h,m]=t.split(":").map(Number); return h*60+m;
 }
+function pad2(n){ return String(n).padStart(2,"0"); }
 
-async function callClaude(systemPrompt, userContent) {
-  const resp = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-6",
-      max_tokens: 1000,
-      system: systemPrompt,
-      messages: [{ role: "user", content: userContent }]
-    })
+// ─── PROXY-FETCH ─────────────────────────────────────────────────────────────
+async function pfetch(url, opts={}) {
+  // corsproxy.io umschließt die Anfrage
+  const proxied = PROXY + encodeURIComponent(url);
+  const r = await fetch(proxied, {
+    method: opts.method || "GET",
+    headers: {
+      "Content-Type": opts.body ? "application/x-www-form-urlencoded" : undefined,
+      // Cookies über custom header weiterreichen (corsproxy.io unterstützt x-cors-headers)
+      ...(S.cookies ? {"x-cors-cookie": S.cookies} : {}),
+      ...(opts.headers||{})
+    },
+    body: opts.body || undefined,
+    redirect: "follow"
   });
-  const data = await resp.json();
-  return data.content?.map(b => b.text || "").join("") || "";
+  // Cookies aus Antwort speichern
+  const sc = r.headers.get("x-cors-cookie") || r.headers.get("set-cookie");
+  if (sc) S.cookies = sc;
+  return r;
 }
 
-async function fetchWithClaude(url, purpose) {
-  const system = `Du bist ein Web-Scraping-Assistent. Wenn du HTML-Inhalt analysierst, extrahierst du die angeforderten Daten präzise und gibst NUR valides JSON zurück, ohne Erklärungen oder Markdown-Code-Blöcke.`;
-  const user = `Analysiere diese URL und extrahiere: ${purpose}\n\nURL: ${url}\n\nBitte nutze dein Web-Search-Tool um die Seite abzurufen und dann die Daten zu extrahieren.`;
-  return await callClaude(system, user);
+// ─── HTML PARSER ─────────────────────────────────────────────────────────────
+function parseHTML(txt) {
+  const dp = new DOMParser(); return dp.parseFromString(txt, "text/html");
 }
 
+function getHidden(doc) {
+  const fields = {};
+  doc.querySelectorAll("input[type=hidden]").forEach(i => {
+    if (i.name) fields[i.name] = i.value||"";
+  });
+  return fields;
+}
+
+function buildForm(fields) {
+  return Object.entries(fields).map(([k,v]) =>
+    encodeURIComponent(k)+"="+encodeURIComponent(v)).join("&");
+}
+
+// ─── LOGIN ────────────────────────────────────────────────────────────────────
 async function doLogin() {
-  const username = document.getElementById("usernameInput").value.trim();
-  const password = document.getElementById("passwordInput").value;
-  if (!username || !password) { showError("Bitte Benutzername und Passwort eingeben."); return; }
+  const user = document.getElementById("inUser").value.trim();
+  const pass = document.getElementById("inPass").value;
+  if (!user||!pass) { showErr("Bitte Benutzerkennung und Kennwort eingeben."); return; }
+  S.user=user; S.pass=pass; S.cookies="";
 
-  const btn = document.getElementById("loginBtn");
-  btn.disabled = true;
-  btn.textContent = "Verbinde…";
-  hideError();
-
-  state.username = username;
-  state.password = password;
-  state.currentMonth = new Date().getMonth();
-  state.currentYear = new Date().getFullYear();
-
-  showMainScreen();
-  await loadDienstplan();
-}
-
-function showMainScreen() {
-  document.getElementById("loginScreen").classList.remove("active");
-  document.getElementById("mainHeader").style.display = "flex";
-  document.getElementById("mainScreen").classList.add("active");
-  document.getElementById("headerUser").textContent = state.username;
-  const btn = document.getElementById("loginBtn");
-  btn.disabled = false;
-  btn.textContent = "Dienstplan laden";
-}
-
-function doLogout() {
-  state.loggedIn = false;
-  state.services = [];
-  document.getElementById("mainHeader").style.display = "none";
-  document.getElementById("mainScreen").classList.remove("active");
-  document.getElementById("loginScreen").classList.add("active");
-  document.getElementById("passwordInput").value = "";
-  closeDetail();
-}
-
-async function loadDienstplan() {
-  const year = state.currentYear;
-  const month = state.currentMonth + 1;
-  const monthStr = String(month).padStart(2,"0");
-
-  updateMonthTitle();
-  showCalendarLoading();
-  closeDetail();
-  document.getElementById("statsBar").style.display = "none";
-
-  const systemPrompt = `Du bist ein Assistent, der Dienstplandaten von RNV WebComm extrahiert.
-Logge dich ein unter: https://fahrerauskunft.rnv-online.de/WebComm/default.aspx
-Benutzername: ${state.username}
-Passwort: ${state.password}
-
-Dann öffne den Roster für ${year}-${monthStr}-01.
-
-Suche in der Kalender-Tabelle (id="calRoster") nach <td class="calDay"> Elementen.
-Extrahiere alle Einträge wo title "Dienst:" enthält und NICHT "abwesend".
-
-Für jeden Dienst extrahiere:
-- day: Tagnummer (2-stellig)
-- id: Dienstnummer aus title nach "Dienst:" bis "•" oder Ende
-- time: Zeit aus dem <span> Element
-
-Gib NUR JSON zurück in diesem Format (keine Markdown, keine Erklärung):
-{"services": [{"day": "05", "id": "2061036", "time": "06:07-15:03"}]}
-
-Falls Login fehlschlägt: {"error": "Login fehlgeschlagen"}
-Falls keine Dienste: {"services": []}`;
+  const btn=document.getElementById("loginBtn");
+  btn.disabled=true; btn.textContent="Verbinde…"; hideErr();
 
   try {
-    const rawResult = await callClaude(systemPrompt, `Extrahiere den Dienstplan für ${MONATE[state.currentMonth]} ${year}.`);
-    let parsed;
-    try {
-      const clean = rawResult.replace(/```json\s?/gi,"").replace(/```/g,"").trim();
-      const jsonMatch = clean.match(/\{[\s\S]*\}/);
-      parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
-    } catch(e) {
-      parsed = null;
-    }
+    // Schritt 1: Cookie-Test-URL abrufen (setzt Testing-Cookie)
+    await pfetch(`${BASE}/default.aspx?TestingCookie=1`);
 
-    if (parsed?.error) {
-      showError(parsed.error);
-      doLogout();
+    // Schritt 2: Login-Seite abrufen → __VIEWSTATE etc. holen
+    const r1 = await pfetch(`${BASE}/default.aspx`);
+    const html1 = await r1.text();
+    const doc1 = parseHTML(html1);
+    const hf = getHidden(doc1);
+
+    // Schritt 3: Login-POST
+    const payload = buildForm({
+      ...hf,
+      "__EVENTTARGET": "ctl00$cntMainBody$lgnView$lgnLogin$LoginButton",
+      "__EVENTARGUMENT": "",
+      "ctl00$cntMainBody$lgnView$lgnLogin$UserName": user,
+      "ctl00$cntMainBody$lgnView$lgnLogin$Password": pass,
+    });
+
+    const r2 = await pfetch(`${BASE}/default.aspx?TestingCookie=1`, {
+      method: "POST", body: payload
+    });
+    const html2 = await r2.text();
+
+    // Login prüfen: nach Login zeigt Seite "Dienstplan" Button
+    if (!html2.toLowerCase().includes("dienstplan") && !html2.toLowerCase().includes("logout") && !html2.toLowerCase().includes("abmelden")) {
+      showErr("Login fehlgeschlagen. Bitte Benutzerkennung und Kennwort prüfen.");
+      btn.disabled=false; btn.textContent="Anmelden & Dienstplan laden";
       return;
     }
 
-    state.services = (parsed?.services || []).map(s => ({
-      ...s, month: monthStr, year: String(year)
-    }));
+    // Erfolgreich
+    document.getElementById("loginScreen").classList.remove("on");
+    document.getElementById("topbar").style.display="flex";
+    document.getElementById("topUser").textContent=user;
+    document.getElementById("mainScreen").classList.add("on");
+    btn.disabled=false; btn.textContent="Anmelden & Dienstplan laden";
 
+    await loadDienstplan();
+
+  } catch(e) {
+    showErr("Verbindungsfehler: "+e.message+". Bitte VPN oder Netzwerk prüfen.");
+    btn.disabled=false; btn.textContent="Anmelden & Dienstplan laden";
+  }
+}
+
+function doLogout() {
+  S = { ...S, services:[], rawText:"", rawTitle:"", cookies:"" };
+  document.getElementById("topbar").style.display="none";
+  document.getElementById("mainScreen").classList.remove("on");
+  document.getElementById("loginScreen").classList.add("on");
+  document.getElementById("inPass").value="";
+  closeDetail();
+}
+
+// ─── DIENSTPLAN LADEN ─────────────────────────────────────────────────────────
+async function loadDienstplan() {
+  updateMonthTitle();
+  document.getElementById("calBox").innerHTML = `<div class="spin-wrap"><div class="spin"></div><div class="spin-txt">Dienstplan wird geladen…</div><div class="spin-sub">${MONATE[S.month]} ${S.year}</div></div>`;
+  document.getElementById("statsRow").style.display="none";
+  closeDetail();
+
+  try {
+    // roster.aspx abrufen (aktueller Monat wird angezeigt)
+    // Für anderen Monat: POST mit CalRoster-Event auf ein Datum im Zielmonat
+    const dateStr = `${S.year}-${pad2(S.month+1)}-01`;
+
+    let rosterHtml;
+    // Erst roster.aspx laden um __VIEWSTATE zu bekommen
+    const r0 = await pfetch(`${BASE}/roster.aspx`);
+    const h0 = await r0.text();
+    const d0 = parseHTML(h0);
+    const hf0 = getHidden(d0);
+
+    // Prüfen ob wir schon im richtigen Monat sind
+    const headerEl = d0.querySelector("header h4");
+    const headerText = headerEl ? headerEl.textContent : "";
+    const correctMonth = headerText.includes(MONATE[S.month]) && headerText.includes(String(S.year));
+
+    if (!correctMonth) {
+      // Zum richtigen Monat navigieren via CalRoster PostBack
+      const navPayload = buildForm({
+        ...hf0,
+        "__EVENTTARGET": "ctl00$ctl00$cntMainBody$calRoster",
+        "__EVENTARGUMENT": dateStr,
+      });
+      const r1 = await pfetch(`${BASE}/roster.aspx`, { method:"POST", body:navPayload });
+      rosterHtml = await r1.text();
+    } else {
+      rosterHtml = h0;
+    }
+
+    S.services = parseRoster(rosterHtml, S.month+1, S.year);
     renderCalendar();
     renderStats();
 
   } catch(e) {
-    showCalendarError("Fehler beim Laden: " + e.message);
+    document.getElementById("calBox").innerHTML = `<div class="empty"><div class="empty-ico">⚠️</div><div class="empty-title">Fehler beim Laden</div><div class="empty-sub">${e.message}</div></div>`;
   }
 }
 
-function updateMonthTitle() {
-  document.getElementById("monthTitle").textContent =
-    `${MONATE[state.currentMonth]} ${state.currentYear}`;
-}
+// ─── ROSTER PARSEN ────────────────────────────────────────────────────────────
+function parseRoster(html, month, year) {
+  const doc = parseHTML(html);
+  const services = [];
 
-function showCalendarLoading() {
-  document.getElementById("calendarContainer").innerHTML = `
-    <div class="loading-state">
-      <div class="spinner"></div>
-      <div class="loading-text">Dienstplan wird geladen…</div>
-      <div class="loading-sub">Verbinde mit RNV WebComm via Claude</div>
-    </div>`;
-}
+  // Alle calDay TDs durchsuchen
+  doc.querySelectorAll("td.calDay").forEach(td => {
+    const title = td.getAttribute("title")||"";
+    const href  = td.getAttribute("href")||"";
 
-function showCalendarError(msg) {
-  document.getElementById("calendarContainer").innerHTML = `
-    <div class="empty-state">
-      <div class="empty-icon">⚠️</div>
-      <div class="empty-title">Fehler beim Laden</div>
-      <div class="empty-sub">${msg}</div>
-    </div>`;
-}
+    // Tagnummer aus dem strong-Element oder href
+    let day = "";
+    const strong = td.querySelector("strong");
+    if (strong) day = strong.textContent.trim().replace(/\D.*/,"").padStart(2,"0");
 
-function renderCalendar() {
-  const year = state.currentYear, month = state.currentMonth;
-  const firstDay = new Date(year, month, 1).getDay();
-  const startOffset = firstDay === 0 ? 6 : firstDay - 1;
-  const daysInMonth = new Date(year, month+1, 0).getDate();
-  const today = new Date();
-  const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+    // Nur aktiver Monat (nicht calOther)
+    if (td.classList.contains("calOther")) return;
 
-  const serviceMap = {};
-  for (const s of state.services) {
-    const key = parseInt(s.day);
-    if (!serviceMap[key]) serviceMap[key] = [];
-    serviceMap[key].push(s);
-  }
+    // Abwesend markieren
+    const isAbsent = title.includes("abwesend") || td.querySelector("span")?.textContent.trim() === "ERSA";
 
-  let html = `<div class="cal-header">`;
-  const days = ["Mo","Di","Mi","Do","Fr","Sa","So"];
-  days.forEach((d,i) => {
-    html += `<div class="cal-weekday${i>=5?' weekend':''}">${d}</div>`;
+    // Dienst?
+    if (title.includes("Dienst:") && !title.includes("abwesend")) {
+      // Dienstnummer aus title: "Dienst: 2061027 • ..."
+      const m = title.match(/Dienst:\s*(\S+)/);
+      const id = m ? m[1] : "";
+      // Zeit aus title
+      const tz = title.match(/Zeit:\s*([\d:]+\s*-\s*[\d:]+)/);
+      const time = tz ? tz[1].replace(/\s/g,"") : "";
+      // Span-Text
+      const span = td.querySelector("span");
+      const spanTxt = span ? span.textContent.trim() : "";
+
+      if (id && day) {
+        services.push({ day, id, time, month:pad2(month), year:String(year), absent:false });
+      }
+    } else if (isAbsent && day) {
+      // Abwesenheit anzeigen
+      services.push({ day, id:"ERSA", time:"", month:pad2(month), year:String(year), absent:true });
+    }
   });
+
+  return services;
+}
+
+// ─── KALENDER RENDERN ─────────────────────────────────────────────────────────
+function renderCalendar() {
+  const y=S.year, m=S.month;
+  const first = new Date(y,m,1).getDay(); // 0=So
+  const off   = first===0 ? 6 : first-1;  // Mo=0
+  const days  = new Date(y,m+1,0).getDate();
+  const today = new Date();
+  const isCurr = today.getFullYear()===y && today.getMonth()===m;
+
+  // Dienst-Map
+  const smap = {};
+  for (const s of S.services) {
+    const d = parseInt(s.day);
+    if (!smap[d]) smap[d] = [];
+    smap[d].push(s);
+  }
+
+  let html = `<div class="cal-head">`;
+  ["Mo","Di","Mi","Do","Fr","Sa","So"].forEach((d,i) =>
+    html += `<div class="cal-wd${i>=5?" we":""}">${d}</div>`);
   html += `</div><div class="cal-grid">`;
 
-  for (let i = 0; i < startOffset; i++) {
-    html += `<div class="cal-day empty"></div>`;
-  }
+  for (let i=0;i<off;i++) html += `<div class="cal-day empty"></div>`;
 
-  for (let d = 1; d <= daysInMonth; d++) {
-    const dow = (startOffset + d - 1) % 7;
-    const isWeekend = dow >= 5;
-    const isToday = isCurrentMonth && today.getDate() === d;
-    const svcs = serviceMap[d] || [];
-    const hasDienst = svcs.length > 0;
+  for (let d=1;d<=days;d++) {
+    const dow = (off+d-1)%7; // 0=Mo … 6=So
+    const we  = dow>=5;
+    const tod = isCurr && today.getDate()===d;
+    const svcs = smap[d]||[];
+    const hasDienst = svcs.some(s=>!s.absent);
     let cls = "cal-day";
-    if (isWeekend) cls += " weekend";
-    if (isToday) cls += " today";
-    if (hasDienst) cls += " has-dienst";
+    if (we) cls+=" we";
+    if (tod) cls+=" today";
+    if (hasDienst) cls+=" clickable";
 
-    const dayNumHtml = isToday
-      ? `<div class="day-num"><span style="background:var(--rnv-blue);color:white;width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;">${d}</span></div>`
-      : `<div class="day-num">${d}</div>`;
+    const dnHtml = tod
+      ? `<div class="dnum"><span style="background:var(--blue);color:#fff;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;">${d}</span></div>`
+      : `<div class="dnum">${d}</div>`;
 
-    let dienstHtml = "";
+    let chips = "";
     for (const s of svcs) {
-      dienstHtml += `<div class="dienst-chip">${s.id}</div>`;
-      if (s.time) dienstHtml += `<div class="dienst-time">${s.time}</div>`;
+      if (s.absent) {
+        chips += `<span class="chip-abs">frei</span>`;
+      } else {
+        chips += `<span class="chip">${s.id}</span>`;
+        if (s.time) chips += `<div class="chip-time">${s.time}</div>`;
+      }
     }
 
-    const clickHandler = hasDienst
-      ? `onclick="showDetail('${svcs[0].day}','${svcs[0].id}',${(startOffset+d-1)%7})"` : "";
+    const dienste = svcs.filter(s=>!s.absent);
+    const onclick = hasDienst
+      ? `onclick="showDetail('${pad2(d)}','${dienste[0].id}',${dow})"` : "";
 
-    html += `<div class="${cls}" ${clickHandler}>${dayNumHtml}${dienstHtml}</div>`;
+    html += `<div class="${cls}" ${onclick}>${dnHtml}${chips}</div>`;
   }
   html += `</div>`;
-
-  document.getElementById("calendarContainer").innerHTML = html;
+  document.getElementById("calBox").innerHTML = html;
 }
 
 function renderStats() {
-  const bar = document.getElementById("statsBar");
-  const count = state.services.length;
+  const dienste = S.services.filter(s=>!s.absent);
+  if (!dienste.length) { document.getElementById("statsRow").style.display="none"; return; }
+  document.getElementById("statsRow").style.display="flex";
+  document.getElementById("stCount").textContent = dienste.length;
 
-  if (count === 0) {
-    bar.style.display = "none";
-    return;
-  }
-
-  bar.style.display = "flex";
-  document.getElementById("statCount").textContent = count;
-
-  // Planzeit aus Zeiten summieren
-  let totalMin = 0;
-  for (const s of state.services) {
-    if (s.time && s.time.includes("-")) {
-      const [st, en] = s.time.split("-");
-      const diff = zeitZuMinuten(en.trim()) - zeitZuMinuten(st.trim());
-      totalMin += diff < 0 ? diff + 24*60 : diff;
+  let tot=0;
+  for (const s of dienste) {
+    if (s.time&&s.time.includes("-")) {
+      const [a,b]=s.time.split("-");
+      let d=zeit2min(b.trim())-zeit2min(a.trim());
+      if (d<0) d+=1440; tot+=d;
     }
   }
-  const totalH = Math.round(totalMin / 60);
-  document.getElementById("statStunden").textContent = totalH > 0 ? `${totalH}h` : "—";
+  document.getElementById("stH").textContent = tot>0 ? `${Math.round(tot/60)}h` : "—";
 
-  // Nächster Dienst
-  const today = new Date();
-  let nextDienst = null;
-  for (const s of state.services) {
-    const d = new Date(parseInt(s.year), parseInt(s.month)-1, parseInt(s.day));
-    if (d >= today) { nextDienst = s; break; }
-  }
-  if (nextDienst) {
-    const d = new Date(parseInt(nextDienst.year), parseInt(nextDienst.month)-1, parseInt(nextDienst.day));
-    document.getElementById("statNaechster").textContent = WOCHENTAG_KURZ[d.getDay() === 0 ? 6 : d.getDay()-1] + " " + d.getDate() + ".";
-  } else {
-    document.getElementById("statNaechster").textContent = "—";
-  }
+  const td = new Date();
+  const nxt = dienste.find(s=>{ const dt=new Date(parseInt(s.year),parseInt(s.month)-1,parseInt(s.day)); return dt>=td; });
+  if (nxt) {
+    const dt=new Date(parseInt(nxt.year),parseInt(nxt.month)-1,parseInt(nxt.day));
+    const wi=dt.getDay()===0?6:dt.getDay()-1;
+    document.getElementById("stNext").textContent = WKTAG[wi]+" "+parseInt(nxt.day)+".";
+  } else { document.getElementById("stNext").textContent="—"; }
 }
 
-async function showDetail(day, dienstId, dowIndex) {
-  const panel = document.getElementById("detailPanel");
-  const dateStr = `${state.currentYear}-${String(state.currentMonth+1).padStart(2,"0")}-${day.padStart(2,"0")}`;
-  const dow = dowIndex; // 0=Mo … 6=So
-  const wt = WOCHENTAG[dow === 6 ? 6 : dow];
-  const datum = `${day.padStart(2,"0")}.${String(state.currentMonth+1).padStart(2,"0")}.${state.currentYear}`;
+function updateMonthTitle() {
+  document.getElementById("monthTitle").textContent = `${MONATE[S.month]} ${S.year}`;
+}
 
-  document.getElementById("detailTitle").textContent = `Dienst ${dienstId}`;
-  document.getElementById("detailSub").textContent = `${wt}, ${datum}`;
-  document.getElementById("detailBody").innerHTML = `
-    <div class="loading-state">
-      <div class="spinner"></div>
-      <div class="loading-text">Lade Umlauf-Details…</div>
-    </div>`;
-  panel.classList.add("show");
-  panel.scrollIntoView({ behavior: "smooth", block: "start" });
+// ─── DETAIL ───────────────────────────────────────────────────────────────────
+async function showDetail(day, dienstId, dow) {
+  const dateStr = `${S.year}-${pad2(S.month+1)}-${day}`;
+  const wi = dow; // 0=Mo…6=So
+  const wt = WKLONG[wi];
+  const datum = `${day}.${pad2(S.month+1)}.${S.year}`;
 
-  state.selectedDienst = { day, dienstId, dateStr, dow, wt, datum };
-
-  const systemPrompt = `Du bist ein Assistent, der Dienstplandaten von RNV WebComm extrahiert.
-Logge dich ein unter: https://fahrerauskunft.rnv-online.de/WebComm/default.aspx
-Benutzername: ${state.username}
-Passwort: ${state.password}
-
-Navigiere zu Datum ${dateStr} via POST auf https://fahrerauskunft.rnv-online.de/WebComm/roster.aspx mit:
-__EVENTTARGET=ctl00$cntMainBody$calRoster
-__EVENTARGUMENT=${dateStr}
-
-Dann rufe https://fahrerauskunft.rnv-online.de/WebComm/shift.aspx?${dateStr} ab.
-
-In der Tabelle id="ctl00_cntMainBody_lstDienstinfo" extrahiere ALLE Zeilen wo Spalte[0] (Dienstnummer) = "${dienstId}".
-
-Spaltenindizes: 0=Dienst-Nr, 1=Von-Zeit, 2=Von-Ort, 3=Bis-Zeit, 4=Bis-Ort, 6=Linie, 8=Umlauf, 9=Art
-
-Extrahiere nur Zeilen mit Art="Lenkzeit" (nicht Wendezeit, nicht Pause selbst).
-Gruppiere nach Umlauf-Nr. Pro Umlauf: erste Lenkzeit = Start, letzte Lenkzeit = Ende.
-Wenn zwischen zwei Umläufen eine Pause-Zeile steht, markiere "pause_danach: true" am vorherigen Umlauf.
-
-Gib NUR JSON zurück (kein Markdown):
-{
-  "umlaeufe": [
-    {
-      "nr": "2662",
-      "linie": "24",
-      "start": {"zeit": "06:07", "von_ort": "Bth. HD Bergheim", "bis_ort": "Heiligenbergschule"},
-      "ende": {"zeit": "09:53", "von_ort": "Heiligenbergschule", "bis_ort": "Bth. HD Betriebshof"},
-      "pause_danach": false
-    }
-  ]
-}`;
+  document.getElementById("dTitle").textContent = `Dienst ${dienstId}`;
+  document.getElementById("dSub").textContent   = `${wt}, ${datum}`;
+  document.getElementById("dBody").innerHTML    = `<div class="spin-wrap"><div class="spin"></div><div class="spin-txt">Lade Umlauf-Details…</div></div>`;
+  document.getElementById("detailBox").classList.add("on");
+  document.getElementById("detailBox").scrollIntoView({behavior:"smooth",block:"start"});
 
   try {
-    const rawResult = await callClaude(systemPrompt, `Extrahiere Umlauf-Details für Dienst ${dienstId} am ${dateStr}.`);
-    let parsed;
-    try {
-      const clean = rawResult.replace(/```json\s?/gi,"").replace(/```/g,"").trim();
-      const m = clean.match(/\{[\s\S]*\}/);
-      parsed = m ? JSON.parse(m[0]) : null;
-    } catch(e) { parsed = null; }
+    // shift.aspx für dieses Datum abrufen
+    // Erst roster.aspx für das Datum aufrufen (Navigation)
+    const r0 = await pfetch(`${BASE}/roster.aspx`);
+    const h0 = await r0.text();
+    const d0 = parseHTML(h0);
+    const hf0 = getHidden(d0);
 
-    if (!parsed || !parsed.umlaeufe) {
-      renderDetailFallback(dienstId, datum, wt);
+    // Auf Datum navigieren
+    const navPayload = buildForm({
+      ...hf0,
+      "__EVENTTARGET": "ctl00$ctl00$cntMainBody$calRoster",
+      "__EVENTARGUMENT": dateStr,
+    });
+    await pfetch(`${BASE}/roster.aspx`, { method:"POST", body:navPayload });
+
+    // shift.aspx abrufen
+    const rShift = await pfetch(`${BASE}/shift.aspx?${dateStr}`);
+    const hShift = await rShift.text();
+
+    const umlaeufe = parseShift(hShift, dienstId, wi);
+
+    if (!umlaeufe.length) {
+      document.getElementById("dBody").innerHTML = `<div class="empty"><div class="empty-ico">🔍</div><div class="empty-title">Keine Umlauf-Daten</div><div class="empty-sub">Dienst ${dienstId} für ${datum} nicht gefunden.</div></div>`;
       return;
     }
 
-    renderDetailUmlaeufe(dienstId, datum, wt, parsed.umlaeufe, dow);
+    renderDetail(dienstId, datum, wi, umlaeufe);
+
   } catch(e) {
-    renderDetailFallback(dienstId, datum, wt, e.message);
+    document.getElementById("dBody").innerHTML = `<div class="empty"><div class="empty-ico">⚠️</div><div class="empty-title">Ladefehler</div><div class="empty-sub">${e.message}</div></div>`;
   }
 }
 
-function renderDetailUmlaeufe(dienstId, datum, wt, umlaeufe, dow) {
-  if (!umlaeufe.length) {
-    document.getElementById("detailBody").innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">🔍</div>
-        <div class="empty-title">Keine Umläufe gefunden</div>
-        <div class="empty-sub">Für diesen Dienst konnten keine Umlauf-Details abgerufen werden.</div>
-      </div>`;
-    return;
+// ─── SHIFT PARSEN ─────────────────────────────────────────────────────────────
+function parseShift(html, dienstId, dow) {
+  const doc = parseHTML(html);
+  const tbl = doc.getElementById("ctl00_cntMainBody_lstDienstinfo");
+  if (!tbl) return [];
+
+  const rows = [];
+  tbl.querySelectorAll("tbody tr").forEach(tr => {
+    const tds = tr.querySelectorAll("td");
+    if (tds.length < 10) return;
+    const c = Array.from(tds).map(td => td.textContent.trim().replace(/\u00a0/g,""));
+    if (c[0] !== dienstId) return;
+    rows.push({ vonZeit:c[1], vonOrt:c[2], bisZeit:c[3], bisOrt:c[4], linie:c[6], umlauf:c[8], art:c[9] });
+  });
+
+  // Gruppieren: Wendezeit ignorieren, Pause trennt Umläufe
+  const result = [];
+  let curUml=null, ersteF=null, letzteF=null;
+
+  function abschluss(pauseDanach) {
+    if (curUml&&ersteF&&letzteF) {
+      result.push({
+        nr: curUml,
+        linie: ersteF.linie,
+        start: { zeit:ersteF.vonZeit, von:ort2kuerzel(ersteF.vonOrt), nach:ort2kuerzel(ersteF.bisOrt), vonOrt:ersteF.vonOrt },
+        ende:  { zeit:letzteF.bisZeit, bisOrt:letzteF.bisOrt, vonOrt:letzteF.vonOrt, bis:ort2kuerzel(letzteF.bisOrt), vonCode:ort2kuerzel(letzteF.vonOrt), linie:letzteF.linie },
+        pauseDanach
+      });
+    }
+    curUml=null; ersteF=null; letzteF=null;
   }
 
-  let html = `<div class="umlauf-list">`;
-  let startZeit = "", endeZeit = "";
+  for (const row of rows) {
+    const art = row.art.toLowerCase();
+    if (art.includes("wendezeit")) continue;
+    if (art.includes("pause")) { abschluss(true); continue; }
+    if (!art.includes("lenkzeit")) continue;
 
-  for (let i = 0; i < umlaeufe.length; i++) {
-    const u = umlaeufe[i];
-    const vonCode = ortZuKuerzel(u.start.von_ort);
-    const nachCode = ortZuKuerzel(u.start.bis_ort);
-    const endeVonCode = ortZuKuerzel(u.ende.von_ort);
-    const endeBisCode = ortZuKuerzel(u.ende.bis_ort);
-    const gegenCode = gegenEndstelle(u.linie, endeVonCode, dow) || endeBisCode;
+    if (curUml&&row.umlauf!==curUml) abschluss(false);
+    if (!curUml) { curUml=row.umlauf; ersteF=row; }
+    letzteF=row;
+  }
+  abschluss(false);
+  return result;
+}
 
-    if (i === 0) startZeit = u.start.zeit;
-    endeZeit = u.ende.zeit;
+// ─── DETAIL RENDERN ───────────────────────────────────────────────────────────
+function renderDetail(dienstId, datum, dow, umlaeufe) {
+  let html = `<div class="ulist">`;
+  let startZ="", endeZ="";
 
-    html += `<div class="umlauf-card">
-      <div class="umlauf-header">
-        <span class="umlauf-nr">Umlauf ${u.nr}</span>
-        <span class="umlauf-linie">Linie ${u.linie}</span>
+  for (let i=0;i<umlaeufe.length;i++) {
+    const u=umlaeufe[i];
+    const nach = u.start.nach;
+    const gegenCode = gegenEnd(u.ende.linie, u.ende.vonCode, dow) || u.ende.bis;
+
+    if (i===0) startZ=u.start.zeit;
+    endeZ=u.ende.zeit;
+
+    html += `<div class="ucard">
+      <div class="ucard-head">
+        <span class="unr">Umlauf ${u.nr}</span>
+        <span class="ulinie">L ${u.linie}</span>
       </div>
-      <div class="umlauf-body">
-        <div class="stop-row start">
-          <span class="stop-time">${u.start.zeit}</span>
-          <span class="stop-arrow">→</span>
-          <span class="stop-code">${vonCode}</span>
-          <span class="stop-name">${u.start.von_ort}</span>
+      <div class="ubody">
+        <div class="srow s">
+          <span class="stime">${u.start.zeit}</span>
+          <span class="sarr">→</span>
+          <span class="scode">${u.start.von}</span>
+          <span class="sname">${u.start.vonOrt}</span>
         </div>
-        <div class="stop-row">
-          <span class="stop-time" style="color:var(--text-muted);font-size:11px;">↓</span>
-          <span style="flex:1;font-size:11px;color:var(--text-muted);padding-left:44px;">→ ${nachCode} · Linie ${u.linie}</span>
+        <div class="srow" style="padding:2px 0 2px 48px;">
+          <span style="font-size:10px;color:var(--muted);">→ ${nach} · Linie ${u.linie}</span>
         </div>
-        <div class="stop-row end">
-          <span class="stop-time">${u.ende.zeit}</span>
-          <span class="stop-arrow">→</span>
-          <span class="stop-code">${endeBisCode}</span>
-          <span class="stop-name">${u.ende.bis_ort}</span>
+        <div class="srow e">
+          <span class="stime">${u.ende.zeit}</span>
+          <span class="sarr">→</span>
+          <span class="scode">${u.ende.bis}</span>
+          <span class="sname">${u.ende.bisOrt}</span>
         </div>
       </div>
-      ${u.pause_danach ? '<div class="pause-badge">☕ Pause</div>' : ""}
+      ${u.pauseDanach?'<div class="pause-badge">☕ Pause</div>':""}
     </div>`;
   }
   html += `</div>`;
 
-  if (startZeit && endeZeit) {
-    const diffMin = zeitZuMinuten(endeZeit) - zeitZuMinuten(startZeit);
-    const dauer = minutenZuDauer(diffMin);
-    html += `<div class="total-time">
-      <div>
-        <div class="total-label">Gesamtdienst</div>
-        <div class="total-range">${startZeit} – ${endeZeit}</div>
-      </div>
-      <div class="total-value">${dauer}</div>
+  if (startZ&&endeZ) {
+    const diff=zeit2min(endeZ)-zeit2min(startZ);
+    html += `<div class="total">
+      <div><div class="total-lbl">Gesamtdienst</div><div class="total-range">${startZ} – ${endeZ}</div></div>
+      <div class="total-val">${min2str(diff)}</div>
     </div>`;
   }
 
-  const rawText = buildRawText(dienstId, datum, wt, umlaeufe, dow, startZeit, endeZeit);
+  const rawText = buildRaw(dienstId, datum, dow, umlaeufe, startZ, endeZ);
+  S.rawText  = rawText;
+  S.rawTitle = `Dienst ${dienstId} - ${datum}`;
 
-  html += `<div class="action-row">
-    <button class="btn-action btn-notiz" onclick="openInNotizen()">📋 In Notizen speichern</button>
-    <button class="btn-action btn-kopieren" onclick="copyToClipboard()">📋 Text kopieren</button>
-    <button class="btn-action btn-ios" onclick="openShortcut()">⚡ Shortcut</button>
+  html += `<div class="acts">
+    <button class="abtn note" onclick="openNotizen()">📋 In Notizen</button>
+    <button class="abtn copy" onclick="copyText()">📋 Kopieren</button>
+    <button class="abtn ios"  onclick="openShortcut()">⚡ Shortcut</button>
   </div>
-  <div class="raw-text" id="rawTextBlock">${rawText}</div>`;
+  <div class="raw">${rawText.replace(/</g,"&lt;")}</div>`;
 
-  document.getElementById("detailBody").innerHTML = html;
-  state.rawText = rawText;
-  state.rawTitle = `Dienst ${dienstId} - ${datum}`;
+  document.getElementById("dBody").innerHTML = html;
 }
 
-function buildRawText(dienstId, datum, wt, umlaeufe, dow, startZeit, endeZeit) {
-  const lines = [];
-  const dayAbbr = wt.slice(0,2);
-  const datumKurz = datum.split(".").map((p,i) => i===2 ? p.slice(-2) : p).join(".");
-  lines.push(`${dayAbbr}, ${datumKurz}   ${dienstId}`);
-  lines.push("─".repeat(24));
+// ─── RAW TEXT ─────────────────────────────────────────────────────────────────
+function buildRaw(dienstId, datum, dow, umlaeufe, startZ, endeZ) {
+  const dp = datum.split(".");
+  const kurz = `${dp[0]}.${dp[1]}.${dp[2].slice(-2)}`;
+  const wk = WKTAG[dow];
+  const lines = [`${wk}, ${kurz}   ${dienstId}`, "─".repeat(24)];
 
-  for (let i = 0; i < umlaeufe.length; i++) {
-    const u = umlaeufe[i];
-    const vonCode = ortZuKuerzel(u.start.von_ort);
-    const nachCode = ortZuKuerzel(u.start.bis_ort);
-    const endeBisCode = ortZuKuerzel(u.ende.bis_ort);
-    const endeVonCode = ortZuKuerzel(u.ende.von_ort);
-    const gegenCode = gegenEndstelle(u.linie, endeVonCode, dow) || endeBisCode;
-
-    if (i > 0) lines.push("");
-    lines.push(`${vonCode.padEnd(6)}${u.start.zeit}  ${u.linie.padStart(2)}  ${nachCode}`);
+  for (let i=0;i<umlaeufe.length;i++) {
+    const u=umlaeufe[i];
+    const nach = u.start.nach;
+    const gegenCode = gegenEnd(u.ende.linie, u.ende.vonCode, dow) || u.ende.bis;
+    if (i>0) lines.push("");
+    lines.push(`${u.start.von.padEnd(6)}${u.start.zeit}  ${u.linie.padStart(2)}  ${nach}`);
     lines.push(`      => ${u.nr}`);
-    lines.push(`${endeBisCode.padEnd(6)}${u.ende.zeit}  ${u.linie.padStart(2)}  ${gegenCode}`);
-    if (u.pause_danach) lines.push("\n      ☕ Pause");
+    lines.push(`${u.ende.bis.padEnd(6)}${u.ende.zeit}  ${u.ende.linie.padStart(2)}  ${gegenCode}`);
+    if (u.pauseDanach) lines.push("\n      ☕ Pause");
   }
 
   lines.push("─".repeat(24));
-  if (startZeit && endeZeit) {
-    const diff = zeitZuMinuten(endeZeit) - zeitZuMinuten(startZeit);
-    lines.push(`${startZeit} – ${endeZeit}  (${minutenZuDauer(diff)})`);
+  if (startZ&&endeZ) {
+    const diff=zeit2min(endeZ)-zeit2min(startZ);
+    lines.push(`${startZ} – ${endeZ}  (${min2str(diff)})`);
   }
   return lines.join("\n");
 }
 
-function renderDetailFallback(dienstId, datum, wt, errorMsg) {
-  const dienst = state.services.find(s =>
-    s.id === dienstId && parseInt(s.day) === parseInt(datum.split(".")[0])
-  );
-  document.getElementById("detailBody").innerHTML = `
-    <div class="empty-state">
-      <div class="empty-icon">ℹ️</div>
-      <div class="empty-title">Dienst ${dienstId}</div>
-      <div class="empty-sub">${dienst?.time || "Zeit nicht verfügbar"}${errorMsg ? "<br><small>"+errorMsg+"</small>" : ""}</div>
-    </div>
-    <div class="action-row">
-      <button class="btn-action btn-notiz" onclick="openShortcut()">⚡ iOS Shortcut</button>
-    </div>`;
-}
-
-function closeDetail() {
-  document.getElementById("detailPanel").classList.remove("show");
-  state.selectedDienst = null;
-  state.rawText = "";
-}
-
-function copyToClipboard() {
-  if (!state.rawText) { showToast("Kein Text verfügbar"); return; }
-  navigator.clipboard.writeText(state.rawText).then(() => {
-    showToast("✓ Text kopiert");
-  }).catch(() => {
-    const ta = document.createElement("textarea");
-    ta.value = state.rawText;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand("copy");
-    document.body.removeChild(ta);
-    showToast("✓ Text kopiert");
+// ─── AKTIONEN ────────────────────────────────────────────────────────────────
+function copyText() {
+  if (!S.rawText) return;
+  navigator.clipboard.writeText(S.rawText).then(()=>toast("✓ Text kopiert")).catch(()=>{
+    const ta=document.createElement("textarea"); ta.value=S.rawText;
+    document.body.appendChild(ta); ta.select(); document.execCommand("copy");
+    document.body.removeChild(ta); toast("✓ Text kopiert");
   });
 }
 
-function openInNotizen() {
-  if (!state.rawText) { showToast("Kein Text verfügbar"); return; }
-  const url = `shortcuts://run-shortcut?name=DienstplanSpeichern&input=text&text=${encodeURIComponent(state.rawText)}`;
-  window.location.href = url;
-  showToast("Öffne Shortcut…");
+function openNotizen() {
+  if (!S.rawText) return;
+  const url=`shortcuts://run-shortcut?name=DienstplanSpeichern&input=text&text=${encodeURIComponent(S.rawText)}`;
+  window.location.href=url; toast("Öffne Shortcut…");
 }
 
-function openShortcut() {
-  if (!state.rawText) {
-    const url = `shortcuts://run-shortcut?name=DienstplanSpeichern`;
-    window.location.href = url;
-  } else {
-    openInNotizen();
-  }
+function openShortcut() { openNotizen(); }
+
+function closeDetail() {
+  document.getElementById("detailBox").classList.remove("on");
 }
 
 async function changeMonth(dir) {
-  state.currentMonth += dir;
-  if (state.currentMonth > 11) { state.currentMonth = 0; state.currentYear++; }
-  if (state.currentMonth < 0) { state.currentMonth = 11; state.currentYear--; }
+  S.month+=dir;
+  if (S.month>11){S.month=0;S.year++;}
+  if (S.month<0){S.month=11;S.year--;}
   await loadDienstplan();
 }
 
-function showError(msg) {
-  const el = document.getElementById("loginError");
-  el.textContent = msg;
-  el.classList.add("show");
-}
-function hideError() { document.getElementById("loginError").classList.remove("show"); }
+// ─── HILFSFUNKTIONEN UI ──────────────────────────────────────────────────────
+function showErr(m){const e=document.getElementById("loginErr");e.textContent=m;e.classList.add("on");}
+function hideErr(){document.getElementById("loginErr").classList.remove("on");}
 
-function showToast(msg) {
-  const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 2500);
+function toast(msg) {
+  const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("on");
+  setTimeout(()=>t.classList.remove("on"),2500);
 }
 
-document.getElementById("passwordInput").addEventListener("keydown", e => {
-  if (e.key === "Enter") doLogin();
-});
-document.getElementById("usernameInput").addEventListener("keydown", e => {
-  if (e.key === "Enter") document.getElementById("passwordInput").focus();
-});
+// Enter-Key
+document.getElementById("inPass").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
+document.getElementById("inUser").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("inPass").focus();});
 </script>
 </body>
 </html>
