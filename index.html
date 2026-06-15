@@ -346,23 +346,26 @@ async function doLogin() {
     const doc1 = parseHTML(html1);
     const hf = getHidden(doc1);
 
-    // Schritt 3: Login-POST
+    // Schritt 3: Login-POST - Hier ist die Änderung!
+    // Wir senden den expliziten Button-Namen mit, wie ein echter Klick.
     const payload = buildForm({
       ...hf,
-      "__EVENTTARGET": "ctl00$cntMainBody$lgnView$lgnLogin$LoginButton",
+      "__EVENTTARGET": "",
       "__EVENTARGUMENT": "",
       "ctl00$cntMainBody$lgnView$lgnLogin$UserName": user,
       "ctl00$cntMainBody$lgnView$lgnLogin$Password": pass,
+      "ctl00$cntMainBody$lgnView$lgnLogin$LoginButton": "Anmelden" // <-- WICHTIG!
     });
 
     const r2 = await pfetch(`${BASE}/default.aspx?TestingCookie=1`, {
-      method: "POST", body: payload
+      method: "POST", 
+      body: payload
     });
     const html2 = await r2.text();
 
-    // Login prüfen: nach Login zeigt Seite "Dienstplan" Button
-    if (!html2.toLowerCase().includes("dienstplan") && !html2.toLowerCase().includes("logout") && !html2.toLowerCase().includes("abmelden")) {
-      showErr("Login fehlgeschlagen. Bitte Benutzerkennung und Kennwort prüfen.");
+    // Login prüfen: Wenn das Login-Formular im HTML noch da ist, schlug es fehl.
+    if (html2.includes("id=\"ctl00_cntMainBody_lgnView_lgnLogin_UserName\"") || html2.includes("Kennwort prüfen")) {
+      showErr("Login abgelehnt. Stimmen die Daten? Falls ja, blockiert der Browser die Cookies (siehe Tipps).");
       btn.disabled=false; btn.textContent="Anmelden & Dienstplan laden";
       return;
     }
@@ -377,18 +380,9 @@ async function doLogin() {
     await loadDienstplan();
 
   } catch(e) {
-    showErr("Verbindungsfehler: "+e.message+". (Ist die CORS-Erweiterung im Browser aktiv?)");
+    showErr("Verbindungsfehler: "+e.message);
     btn.disabled=false; btn.textContent="Anmelden & Dienstplan laden";
   }
-}
-
-function doLogout() {
-  S = { ...S, services:[], rawText:"", rawTitle:"" };
-  document.getElementById("topbar").style.display="none";
-  document.getElementById("mainScreen").classList.remove("on");
-  document.getElementById("loginScreen").classList.add("on");
-  document.getElementById("inPass").value="";
-  closeDetail();
 }
 
 // ─── DIENSTPLAN LADEN ─────────────────────────────────────────────────────────
