@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RNV Dienstplan</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%2300254C'/><text y='.9em' font-size='70' x='15'>🚃</text></svg>">
+<style>
+  :root {
+    --rnv-blue: #00254C;
+    --rnv-orange: #EE7202;
+    --rnv-blue-light: #003b78;
+    --rnv-orange-light: #ff8c1a;
+    --white: #ffffff;
+    --surface: #f4f7fb;
+    --surface2: #e8eef7;
+    --text-primary: #00254C;
+    --text-secondary: #4a6080;
+    --text-muted: #8099b3;
+    --border: #d0dae8;
+    --border-light: #e8eef7;
+    --success: #1a7a3c;
+    --danger: #c0392b;
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--surface);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--rnv-blue);
+    padding: 0 24px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo-mark {
+    width: 32px; height: 32px;
+    background: var(--rnv-orange);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .header-title {
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .header-sub {
+    color: rgba(255,255,255,0.5);
+    font-size: 12px;
+    margin-left: auto;
+  }
+  .logout-btn {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .logout-btn:hover { background: rgba(255,255,255,0.18); }
+
+  /* SCREENS */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* LOGIN */
+  #loginScreen {
+    min-height: 100vh;
+    background: var(--rnv-blue);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  #loginScreen.active { display: flex; }
+  .login-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 36px 32px;
+    width: 100%;
+    max-width: 360px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .login-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .login-logo-mark {
+    width: 40px; height: 40px;
+    background: var(--rnv-orange);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+  .login-logo-text {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--rnv-blue);
+    letter-spacing: -0.5px;
+  }
+  .login-logo-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .field input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 14px;
+    color: var(--text-primary);
+    transition: border-color 0.15s;
+    outline: none;
+    font-family: inherit;
+  }
+  .field input:focus { border-color: var(--rnv-orange); }
+  .btn-primary {
+    width: 100%;
+    background: var(--rnv-blue);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-top: 8px;
+    font-family: inherit;
+  }
+  .btn-primary:hover { background: var(--rnv-blue-light); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .login-note {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 16px;
+    line-height: 1.5;
+  }
+  .error-msg {
+    background: #fff0f0;
+    border: 1px solid #ffcccc;
+    color: var(--danger);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-top: 12px;
+    display: none;
+  }
+  .error-msg.show { display: block; }
+
+  /* MAIN */
+  #mainScreen { display: none; }
+  #mainScreen.active { display: block; }
+
+  .container { max-width: 760px; margin: 0 auto; padding: 24px 16px; }
+
+  /* MONTH NAV */
+  .month-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .month-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--rnv-blue);
+    letter-spacing: -0.3px;
+  }
+  .nav-btn {
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    width: 36px; height: 36px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-secondary);
+    transition: all 0.15s;
+  }
+  .nav-btn:hover { border-color: var(--rnv-orange); color: var(--rnv-orange); }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    flex: 1;
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    text-align: center;
+  }
+  .stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--rnv-blue);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .stat-card.orange .stat-value { color: var(--rnv-orange); }
+
+  /* CALENDAR GRID */
+  .calendar {
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .cal-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: var(--rnv-blue);
+  }
+  .cal-weekday {
+    text-align: center;
+    padding: 10px 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .cal-weekday.weekend { color: rgba(238,114,2,0.85); }
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0;
+  }
+  .cal-day {
+    min-height: 56px;
+    padding: 6px;
+    border-right: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--border-light);
+    position: relative;
+    cursor: default;
+  }
+  .cal-day:nth-child(7n) { border-right: none; }
+  .cal-day.empty { background: var(--surface); }
+  .cal-day.weekend:not(.empty) { background: #fefaf5; }
+  .cal-day.today { background: #f0f6ff; }
+  .cal-day.has-dienst {
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .cal-day.has-dienst:hover { background: #fff5eb; }
+  .day-num {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    line-height: 1;
+  }
+  .cal-day.today .day-num {
+    background: var(--rnv-blue);
+    color: white;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+  }
+  .dienst-chip {
+    margin-top: 4px;
+    background: var(--rnv-orange);
+    color: white;
+    border-radius: 5px;
+    padding: 2px 5px;
+    font-size: 10px;
+    font-weight: 600;
+    display: inline-block;
+    line-height: 1.4;
+  }
+  .dienst-time {
+    font-size: 9px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* LOADING */
+  .loading-state {
+    text-align: center;
+    padding: 60px 24px;
+  }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--rnv-orange);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { color: var(--text-secondary); font-size: 14px; }
+  .loading-sub { color: var(--text-muted); font-size: 12px; margin-top: 6px; }
+
+  /* DETAIL PANEL */
+  .detail-panel {
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    display: none;
+  }
+  .detail-panel.show { display: block; }
+  .detail-header {
+    background: var(--rnv-blue);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .detail-icon {
+    background: var(--rnv-orange);
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .detail-title {
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .detail-sub {
+    color: rgba(255,255,255,0.6);
+    font-size: 12px;
+    margin-top: 2px;
+  }
+  .detail-close {
+    margin-left: auto;
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .detail-close:hover { background: rgba(255,255,255,0.25); }
+  .detail-body { padding: 20px; }
+
+  /* UMLAUF CARDS */
+  .umlauf-list { display: flex; flex-direction: column; gap: 12px; }
+  .umlauf-card {
+    border: 1.5px solid var(--border-light);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .umlauf-header {
+    background: var(--surface);
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .umlauf-nr {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--rnv-orange);
+    letter-spacing: 0.3px;
+  }
+  .umlauf-linie {
+    background: var(--rnv-blue);
+    color: white;
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .umlauf-body { padding: 12px 14px; }
+  .stop-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+  }
+  .stop-row + .stop-row {
+    border-top: 1px dashed var(--border-light);
+  }
+  .stop-time {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--rnv-blue);
+    min-width: 44px;
+    letter-spacing: 0.3px;
+  }
+  .stop-arrow { color: var(--text-muted); font-size: 12px; }
+  .stop-code {
+    font-family: monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--surface2);
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+  }
+  .stop-name { font-size: 12px; color: var(--text-muted); flex: 1; }
+  .stop-row.start .stop-time { color: var(--success); }
+  .stop-row.end .stop-time { color: var(--rnv-orange); }
+  .pause-badge {
+    text-align: center;
+    padding: 6px;
+    font-size: 11px;
+    color: var(--text-muted);
+    border-top: 1px dashed var(--border);
+    margin-top: 4px;
+  }
+
+  /* GESAMTZEIT */
+  .total-time {
+    background: var(--rnv-blue);
+    color: white;
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+  }
+  .total-label { font-size: 12px; color: rgba(255,255,255,0.65); }
+  .total-value { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
+  .total-range { font-size: 13px; color: rgba(255,255,255,0.8); font-family: monospace; }
+
+  /* ACTION BUTTONS */
+  .action-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .btn-action {
+    flex: 1;
+    min-width: 120px;
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn-notiz {
+    background: var(--rnv-orange);
+    color: white;
+  }
+  .btn-notiz:hover { background: var(--rnv-orange-light); }
+  .btn-kopieren {
+    background: var(--surface2);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+  }
+  .btn-kopieren:hover { background: var(--surface); }
+  .btn-ios {
+    background: #1c1c1e;
+    color: white;
+  }
+  .btn-ios:hover { background: #2c2c2e; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--rnv-blue);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    white-space: nowrap;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 40px 24px;
+  }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-title { font-size: 15px; font-weight: 600; color: var(--text-secondary); }
+  .empty-sub { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
+
+  /* RAW TEXT */
+  .raw-text {
+    font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+    font-size: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    white-space: pre;
+    overflow-x: auto;
+    color: var(--text-primary);
+    line-height: 1.6;
+    margin-top: 12px;
+  }
+
+  @media (max-width: 500px) {
+    .stats-bar { gap: 8px; }
+    .stat-card { padding: 10px 12px; }
+    .stat-value { font-size: 18px; }
+    .cal-day { min-height: 44px; }
+    .dienst-chip { font-size: 9px; }
+    .action-row { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="screen active">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-mark">🚃</div>
+      <div>
+        <div class="login-logo-text">Perdis</div>
+        <div class="login-logo-sub">RNV Dienstplan-Übersicht</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Benutzername</label>
+      <input type="text" id="usernameInput" placeholder="Dein RNV-Login" autocomplete="username" />
+    </div>
+    <div class="field">
+      <label>Passwort</label>
+      <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+    <button class="btn-primary" id="loginBtn" onclick="doLogin()">Dienstplan laden</button>
+    <div class="error-msg" id="loginError"></div>
+    <p class="login-note">Deine Daten werden nur für den direkten Login bei<br>fahrerauskunft.rnv-online.de verwendet.</p>
+  </div>
+</div>
+
+<!-- HEADER (hidden until logged in) -->
+<div class="header" id="mainHeader" style="display:none;">
+  <div class="logo-mark">🚃</div>
+  <div class="header-title">Perdis</div>
+  <span class="header-sub" id="headerUser"></span>
+  <button class="logout-btn" onclick="doLogout()">Abmelden</button>
+</div>
+
+<!-- MAIN -->
+<div id="mainScreen" class="screen">
+  <div class="container">
+
+    <!-- MONTH NAV -->
+    <div class="month-nav">
+      <button class="nav-btn" onclick="changeMonth(-1)">◀</button>
+      <div class="month-title" id="monthTitle">—</div>
+      <button class="nav-btn" onclick="changeMonth(+1)">▶</button>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-bar" id="statsBar" style="display:none;">
+      <div class="stat-card">
+        <div class="stat-value" id="statCount">0</div>
+        <div class="stat-label">Dienste</div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-value" id="statStunden">0h</div>
+        <div class="stat-label">Planzeit</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statNaechster">—</div>
+        <div class="stat-label">Nächster</div>
+      </div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div class="calendar" id="calendarContainer">
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <div class="loading-text">Dienstplan wird geladen…</div>
+        <div class="loading-sub">Verbinde mit RNV WebComm</div>
+      </div>
+    </div>
+
+    <!-- DETAIL PANEL -->
+    <div class="detail-panel" id="detailPanel">
+      <div class="detail-header">
+        <div class="detail-icon">🚋</div>
+        <div>
+          <div class="detail-title" id="detailTitle">Dienst</div>
+          <div class="detail-sub" id="detailSub">Lade Details…</div>
+        </div>
+        <button class="detail-close" onclick="closeDetail()">✕</button>
+      </div>
+      <div class="detail-body" id="detailBody">
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <div class="loading-text">Lade Umlauf-Details…</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const BASE_URL = "https://fahrerauskunft.rnv-online.de/WebComm";
+const CORS_PROXY = "https://corsproxy.io/?url=";
+
+const WOCHENTAG = ["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"];
+const WOCHENTAG_KURZ = ["Mo","Di","Mi","Do","Fr","Sa","So"];
+const MONATE = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+
+const STOPS = {
+  "Bth. HD Bergheim":"BHBE","Bth HD Bergheim":"BHBE",
+  "Bismarckplatz":"BHBP","Betriebshof":"BHBH",
+  "Bth. HD Betriebshof":"BHBH","Bth HD Betriebshof":"BHBH",
+  "Kirchheim Friedhof":"KHFH","Heiligenbergschule":"HHHS",
+  "Hans-Thoma-Platz":"HHHT","Rohrbach Süd":"RSRS",
+  "HD Hauptbahnhof":"BHHF","Campus Bergheim":"BHCA",
+  "Bth. Wieblinger Weg":"BHWI","S-Bhf Weststadt/Südstadt":"WSBF",
+  "Campus Im Neuenheimer Feld":"NFCN","Zoo":"NFZO",
+  "Schwimmbad":"NFSB","Kopfklinik":"NFKO","Jugendherberge":"NFJH",
+  "S-Bhf Schlierbach/Ziegelhausen":"SBBF","S-Bhf Orthopädie":"SBOK",
+  "S-Bhf Kirchheim/Rohrbach":"KHBF","Kirchheim Rathaus":"KHRH",
+  "Kirchheimer Hof":"KHKH","Hagellachstraße":"KHHS",
+  "Kirchheimer Straße":"EHKS","Heiligenberg":"HHBG",
+  "Heiligenbergstraße":"HHHB","Johann-Fischer-Str.":"HHJF",
+  "Tiefburg":"HHTG","Turnerbrunnen":"HHTB","Mühltalstraße":"HHMS",
+  "Rohrbach Markt":"RBMA","Rohrbach Kirche":"RBKI","Rohrbach Friedhof":"RBFR",
+  "Rohrbach Rathaus":"RBRH","Rohrbach NVZ":"RBNV","Sickingenplatz":"RBSP",
+  "Alte Brücke":"ASAB","Friedrich-Ebert-Platz":"ASEP","Peterskirche":"ASPK",
+  "Rathaus/Bergbahn":"ASRB","Stadthalle":"ASSH","Universitätsplatz":"ASUP",
+  "S-Bhf Altstadt":"ASBF","Bunsengymnasium":"NHBG","Theodor-Heuss-Brücke":"NHTH",
+  "Technologiepark":"NHTP","Schriesheim Bahnhof":"SRBF","Eppelheimer Terrasse":"BSET",
+  "Marlene-Dietrich-Platz":"SSMD","Mark-Twain-Center":"SSMT","HD Rheinstraße":"SSRS",
+  "Leimen Friedhof":"LEFH","Leimen Georgi-Marktplatz":"LEGP","Leimen Kurpfalz-Centrum":"LEKC"
+};
+
+const ENDSTELLEN = {
+  "21": {"mo_fr":["HHHT","SRBF"],"wende":["HHHT","BHBP"]},
+  "22": {"mo_fr":["BHBP","EHKS"],"wende":["BHBP","EHKS"]},
+  "23": {"mo_fr":["BHBP","LEFH"],"wende":["BHBP","LEFH"]},
+  "24": {"mo_fr":["RSRS","HHHS"],"wende":["RSRS","HHHS"]},
+  "26": {"mo_fr":["KHFH","HHHS"],"wende":["KHFH","HHHS"]},
+};
+
+let state = {
+  username: "", password: "", loggedIn: false,
+  currentMonth: new Date().getMonth(),
+  currentYear: new Date().getFullYear(),
+  services: [],
+  selectedDienst: null,
+  cookies: ""
+};
+
+function ortZuKuerzel(name) {
+  name = (name || "").trim().replace(/\u00a0/g,"");
+  if (!name) return "????";
+  if (STOPS[name]) return STOPS[name];
+  const nl = name.toLowerCase();
+  for (const [k,v] of Object.entries(STOPS)) {
+    if (k.toLowerCase().includes(nl) || nl.includes(k.toLowerCase())) return v;
+  }
+  const letters = name.toUpperCase().replace(/[^A-Z]/g,"");
+  return (letters.slice(0,4) || "????").padEnd(4,"?");
+}
+
+function gegenEndstelle(linie, vonCode, dow) {
+  const info = ENDSTELLEN[linie];
+  if (!info) return null;
+  const key = dow >= 5 ? "wende" : "mo_fr";
+  const [a,b] = info[key];
+  if (vonCode === a) return b;
+  if (vonCode === b) return a;
+  return null;
+}
+
+function zeitZuMinuten(t) {
+  if (!t || t === "-") return 0;
+  const [h,m] = t.split(":").map(Number);
+  return h*60 + m;
+}
+
+function minutenZuDauer(m) {
+  if (m < 0) m += 24*60;
+  const h = Math.floor(m/60), min = m%60;
+  return `${h}h${String(min).padStart(2,"0")}min`;
+}
+
+async function callClaude(systemPrompt, userContent) {
+  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: [{ role: "user", content: userContent }]
+    })
+  });
+  const data = await resp.json();
+  return data.content?.map(b => b.text || "").join("") || "";
+}
+
+async function fetchWithClaude(url, purpose) {
+  const system = `Du bist ein Web-Scraping-Assistent. Wenn du HTML-Inhalt analysierst, extrahierst du die angeforderten Daten präzise und gibst NUR valides JSON zurück, ohne Erklärungen oder Markdown-Code-Blöcke.`;
+  const user = `Analysiere diese URL und extrahiere: ${purpose}\n\nURL: ${url}\n\nBitte nutze dein Web-Search-Tool um die Seite abzurufen und dann die Daten zu extrahieren.`;
+  return await callClaude(system, user);
+}
+
+async function doLogin() {
+  const username = document.getElementById("usernameInput").value.trim();
+  const password = document.getElementById("passwordInput").value;
+  if (!username || !password) { showError("Bitte Benutzername und Passwort eingeben."); return; }
+
+  const btn = document.getElementById("loginBtn");
+  btn.disabled = true;
+  btn.textContent = "Verbinde…";
+  hideError();
+
+  state.username = username;
+  state.password = password;
+  state.currentMonth = new Date().getMonth();
+  state.currentYear = new Date().getFullYear();
+
+  showMainScreen();
+  await loadDienstplan();
+}
+
+function showMainScreen() {
+  document.getElementById("loginScreen").classList.remove("active");
+  document.getElementById("mainHeader").style.display = "flex";
+  document.getElementById("mainScreen").classList.add("active");
+  document.getElementById("headerUser").textContent = state.username;
+  const btn = document.getElementById("loginBtn");
+  btn.disabled = false;
+  btn.textContent = "Dienstplan laden";
+}
+
+function doLogout() {
+  state.loggedIn = false;
+  state.services = [];
+  document.getElementById("mainHeader").style.display = "none";
+  document.getElementById("mainScreen").classList.remove("active");
+  document.getElementById("loginScreen").classList.add("active");
+  document.getElementById("passwordInput").value = "";
+  closeDetail();
+}
+
+async function loadDienstplan() {
+  const year = state.currentYear;
+  const month = state.currentMonth + 1;
+  const monthStr = String(month).padStart(2,"0");
+
+  updateMonthTitle();
+  showCalendarLoading();
+  closeDetail();
+  document.getElementById("statsBar").style.display = "none";
+
+  const systemPrompt = `Du bist ein Assistent, der Dienstplandaten von RNV WebComm extrahiert.
+Logge dich ein unter: https://fahrerauskunft.rnv-online.de/WebComm/default.aspx
+Benutzername: ${state.username}
+Passwort: ${state.password}
+
+Dann öffne den Roster für ${year}-${monthStr}-01.
+
+Suche in der Kalender-Tabelle (id="calRoster") nach <td class="calDay"> Elementen.
+Extrahiere alle Einträge wo title "Dienst:" enthält und NICHT "abwesend".
+
+Für jeden Dienst extrahiere:
+- day: Tagnummer (2-stellig)
+- id: Dienstnummer aus title nach "Dienst:" bis "•" oder Ende
+- time: Zeit aus dem <span> Element
+
+Gib NUR JSON zurück in diesem Format (keine Markdown, keine Erklärung):
+{"services": [{"day": "05", "id": "2061036", "time": "06:07-15:03"}]}
+
+Falls Login fehlschlägt: {"error": "Login fehlgeschlagen"}
+Falls keine Dienste: {"services": []}`;
+
+  try {
+    const rawResult = await callClaude(systemPrompt, `Extrahiere den Dienstplan für ${MONATE[state.currentMonth]} ${year}.`);
+    let parsed;
+    try {
+      const clean = rawResult.replace(/```json\s?/gi,"").replace(/```/g,"").trim();
+      const jsonMatch = clean.match(/\{[\s\S]*\}/);
+      parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
+    } catch(e) {
+      parsed = null;
+    }
+
+    if (parsed?.error) {
+      showError(parsed.error);
+      doLogout();
+      return;
+    }
+
+    state.services = (parsed?.services || []).map(s => ({
+      ...s, month: monthStr, year: String(year)
+    }));
+
+    renderCalendar();
+    renderStats();
+
+  } catch(e) {
+    showCalendarError("Fehler beim Laden: " + e.message);
+  }
+}
+
+function updateMonthTitle() {
+  document.getElementById("monthTitle").textContent =
+    `${MONATE[state.currentMonth]} ${state.currentYear}`;
+}
+
+function showCalendarLoading() {
+  document.getElementById("calendarContainer").innerHTML = `
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <div class="loading-text">Dienstplan wird geladen…</div>
+      <div class="loading-sub">Verbinde mit RNV WebComm via Claude</div>
+    </div>`;
+}
+
+function showCalendarError(msg) {
+  document.getElementById("calendarContainer").innerHTML = `
+    <div class="empty-state">
+      <div class="empty-icon">⚠️</div>
+      <div class="empty-title">Fehler beim Laden</div>
+      <div class="empty-sub">${msg}</div>
+    </div>`;
+}
+
+function renderCalendar() {
+  const year = state.currentYear, month = state.currentMonth;
+  const firstDay = new Date(year, month, 1).getDay();
+  const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const today = new Date();
+  const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+
+  const serviceMap = {};
+  for (const s of state.services) {
+    const key = parseInt(s.day);
+    if (!serviceMap[key]) serviceMap[key] = [];
+    serviceMap[key].push(s);
+  }
+
+  let html = `<div class="cal-header">`;
+  const days = ["Mo","Di","Mi","Do","Fr","Sa","So"];
+  days.forEach((d,i) => {
+    html += `<div class="cal-weekday${i>=5?' weekend':''}">${d}</div>`;
+  });
+  html += `</div><div class="cal-grid">`;
+
+  for (let i = 0; i < startOffset; i++) {
+    html += `<div class="cal-day empty"></div>`;
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dow = (startOffset + d - 1) % 7;
+    const isWeekend = dow >= 5;
+    const isToday = isCurrentMonth && today.getDate() === d;
+    const svcs = serviceMap[d] || [];
+    const hasDienst = svcs.length > 0;
+    let cls = "cal-day";
+    if (isWeekend) cls += " weekend";
+    if (isToday) cls += " today";
+    if (hasDienst) cls += " has-dienst";
+
+    const dayNumHtml = isToday
+      ? `<div class="day-num"><span style="background:var(--rnv-blue);color:white;width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;">${d}</span></div>`
+      : `<div class="day-num">${d}</div>`;
+
+    let dienstHtml = "";
+    for (const s of svcs) {
+      dienstHtml += `<div class="dienst-chip">${s.id}</div>`;
+      if (s.time) dienstHtml += `<div class="dienst-time">${s.time}</div>`;
+    }
+
+    const clickHandler = hasDienst
+      ? `onclick="showDetail('${svcs[0].day}','${svcs[0].id}',${(startOffset+d-1)%7})"` : "";
+
+    html += `<div class="${cls}" ${clickHandler}>${dayNumHtml}${dienstHtml}</div>`;
+  }
+  html += `</div>`;
+
+  document.getElementById("calendarContainer").innerHTML = html;
+}
+
+function renderStats() {
+  const bar = document.getElementById("statsBar");
+  const count = state.services.length;
+
+  if (count === 0) {
+    bar.style.display = "none";
+    return;
+  }
+
+  bar.style.display = "flex";
+  document.getElementById("statCount").textContent = count;
+
+  // Planzeit aus Zeiten summieren
+  let totalMin = 0;
+  for (const s of state.services) {
+    if (s.time && s.time.includes("-")) {
+      const [st, en] = s.time.split("-");
+      const diff = zeitZuMinuten(en.trim()) - zeitZuMinuten(st.trim());
+      totalMin += diff < 0 ? diff + 24*60 : diff;
+    }
+  }
+  const totalH = Math.round(totalMin / 60);
+  document.getElementById("statStunden").textContent = totalH > 0 ? `${totalH}h` : "—";
+
+  // Nächster Dienst
+  const today = new Date();
+  let nextDienst = null;
+  for (const s of state.services) {
+    const d = new Date(parseInt(s.year), parseInt(s.month)-1, parseInt(s.day));
+    if (d >= today) { nextDienst = s; break; }
+  }
+  if (nextDienst) {
+    const d = new Date(parseInt(nextDienst.year), parseInt(nextDienst.month)-1, parseInt(nextDienst.day));
+    document.getElementById("statNaechster").textContent = WOCHENTAG_KURZ[d.getDay() === 0 ? 6 : d.getDay()-1] + " " + d.getDate() + ".";
+  } else {
+    document.getElementById("statNaechster").textContent = "—";
+  }
+}
+
+async function showDetail(day, dienstId, dowIndex) {
+  const panel = document.getElementById("detailPanel");
+  const dateStr = `${state.currentYear}-${String(state.currentMonth+1).padStart(2,"0")}-${day.padStart(2,"0")}`;
+  const dow = dowIndex; // 0=Mo … 6=So
+  const wt = WOCHENTAG[dow === 6 ? 6 : dow];
+  const datum = `${day.padStart(2,"0")}.${String(state.currentMonth+1).padStart(2,"0")}.${state.currentYear}`;
+
+  document.getElementById("detailTitle").textContent = `Dienst ${dienstId}`;
+  document.getElementById("detailSub").textContent = `${wt}, ${datum}`;
+  document.getElementById("detailBody").innerHTML = `
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <div class="loading-text">Lade Umlauf-Details…</div>
+    </div>`;
+  panel.classList.add("show");
+  panel.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  state.selectedDienst = { day, dienstId, dateStr, dow, wt, datum };
+
+  const systemPrompt = `Du bist ein Assistent, der Dienstplandaten von RNV WebComm extrahiert.
+Logge dich ein unter: https://fahrerauskunft.rnv-online.de/WebComm/default.aspx
+Benutzername: ${state.username}
+Passwort: ${state.password}
+
+Navigiere zu Datum ${dateStr} via POST auf https://fahrerauskunft.rnv-online.de/WebComm/roster.aspx mit:
+__EVENTTARGET=ctl00$cntMainBody$calRoster
+__EVENTARGUMENT=${dateStr}
+
+Dann rufe https://fahrerauskunft.rnv-online.de/WebComm/shift.aspx?${dateStr} ab.
+
+In der Tabelle id="ctl00_cntMainBody_lstDienstinfo" extrahiere ALLE Zeilen wo Spalte[0] (Dienstnummer) = "${dienstId}".
+
+Spaltenindizes: 0=Dienst-Nr, 1=Von-Zeit, 2=Von-Ort, 3=Bis-Zeit, 4=Bis-Ort, 6=Linie, 8=Umlauf, 9=Art
+
+Extrahiere nur Zeilen mit Art="Lenkzeit" (nicht Wendezeit, nicht Pause selbst).
+Gruppiere nach Umlauf-Nr. Pro Umlauf: erste Lenkzeit = Start, letzte Lenkzeit = Ende.
+Wenn zwischen zwei Umläufen eine Pause-Zeile steht, markiere "pause_danach: true" am vorherigen Umlauf.
+
+Gib NUR JSON zurück (kein Markdown):
+{
+  "umlaeufe": [
+    {
+      "nr": "2662",
+      "linie": "24",
+      "start": {"zeit": "06:07", "von_ort": "Bth. HD Bergheim", "bis_ort": "Heiligenbergschule"},
+      "ende": {"zeit": "09:53", "von_ort": "Heiligenbergschule", "bis_ort": "Bth. HD Betriebshof"},
+      "pause_danach": false
+    }
+  ]
+}`;
+
+  try {
+    const rawResult = await callClaude(systemPrompt, `Extrahiere Umlauf-Details für Dienst ${dienstId} am ${dateStr}.`);
+    let parsed;
+    try {
+      const clean = rawResult.replace(/```json\s?/gi,"").replace(/```/g,"").trim();
+      const m = clean.match(/\{[\s\S]*\}/);
+      parsed = m ? JSON.parse(m[0]) : null;
+    } catch(e) { parsed = null; }
+
+    if (!parsed || !parsed.umlaeufe) {
+      renderDetailFallback(dienstId, datum, wt);
+      return;
+    }
+
+    renderDetailUmlaeufe(dienstId, datum, wt, parsed.umlaeufe, dow);
+  } catch(e) {
+    renderDetailFallback(dienstId, datum, wt, e.message);
+  }
+}
+
+function renderDetailUmlaeufe(dienstId, datum, wt, umlaeufe, dow) {
+  if (!umlaeufe.length) {
+    document.getElementById("detailBody").innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-title">Keine Umläufe gefunden</div>
+        <div class="empty-sub">Für diesen Dienst konnten keine Umlauf-Details abgerufen werden.</div>
+      </div>`;
+    return;
+  }
+
+  let html = `<div class="umlauf-list">`;
+  let startZeit = "", endeZeit = "";
+
+  for (let i = 0; i < umlaeufe.length; i++) {
+    const u = umlaeufe[i];
+    const vonCode = ortZuKuerzel(u.start.von_ort);
+    const nachCode = ortZuKuerzel(u.start.bis_ort);
+    const endeVonCode = ortZuKuerzel(u.ende.von_ort);
+    const endeBisCode = ortZuKuerzel(u.ende.bis_ort);
+    const gegenCode = gegenEndstelle(u.linie, endeVonCode, dow) || endeBisCode;
+
+    if (i === 0) startZeit = u.start.zeit;
+    endeZeit = u.ende.zeit;
+
+    html += `<div class="umlauf-card">
+      <div class="umlauf-header">
+        <span class="umlauf-nr">Umlauf ${u.nr}</span>
+        <span class="umlauf-linie">Linie ${u.linie}</span>
+      </div>
+      <div class="umlauf-body">
+        <div class="stop-row start">
+          <span class="stop-time">${u.start.zeit}</span>
+          <span class="stop-arrow">→</span>
+          <span class="stop-code">${vonCode}</span>
+          <span class="stop-name">${u.start.von_ort}</span>
+        </div>
+        <div class="stop-row">
+          <span class="stop-time" style="color:var(--text-muted);font-size:11px;">↓</span>
+          <span style="flex:1;font-size:11px;color:var(--text-muted);padding-left:44px;">→ ${nachCode} · Linie ${u.linie}</span>
+        </div>
+        <div class="stop-row end">
+          <span class="stop-time">${u.ende.zeit}</span>
+          <span class="stop-arrow">→</span>
+          <span class="stop-code">${endeBisCode}</span>
+          <span class="stop-name">${u.ende.bis_ort}</span>
+        </div>
+      </div>
+      ${u.pause_danach ? '<div class="pause-badge">☕ Pause</div>' : ""}
+    </div>`;
+  }
+  html += `</div>`;
+
+  if (startZeit && endeZeit) {
+    const diffMin = zeitZuMinuten(endeZeit) - zeitZuMinuten(startZeit);
+    const dauer = minutenZuDauer(diffMin);
+    html += `<div class="total-time">
+      <div>
+        <div class="total-label">Gesamtdienst</div>
+        <div class="total-range">${startZeit} – ${endeZeit}</div>
+      </div>
+      <div class="total-value">${dauer}</div>
+    </div>`;
+  }
+
+  const rawText = buildRawText(dienstId, datum, wt, umlaeufe, dow, startZeit, endeZeit);
+
+  html += `<div class="action-row">
+    <button class="btn-action btn-notiz" onclick="openInNotizen()">📋 In Notizen speichern</button>
+    <button class="btn-action btn-kopieren" onclick="copyToClipboard()">📋 Text kopieren</button>
+    <button class="btn-action btn-ios" onclick="openShortcut()">⚡ Shortcut</button>
+  </div>
+  <div class="raw-text" id="rawTextBlock">${rawText}</div>`;
+
+  document.getElementById("detailBody").innerHTML = html;
+  state.rawText = rawText;
+  state.rawTitle = `Dienst ${dienstId} - ${datum}`;
+}
+
+function buildRawText(dienstId, datum, wt, umlaeufe, dow, startZeit, endeZeit) {
+  const lines = [];
+  const dayAbbr = wt.slice(0,2);
+  const datumKurz = datum.split(".").map((p,i) => i===2 ? p.slice(-2) : p).join(".");
+  lines.push(`${dayAbbr}, ${datumKurz}   ${dienstId}`);
+  lines.push("─".repeat(24));
+
+  for (let i = 0; i < umlaeufe.length; i++) {
+    const u = umlaeufe[i];
+    const vonCode = ortZuKuerzel(u.start.von_ort);
+    const nachCode = ortZuKuerzel(u.start.bis_ort);
+    const endeBisCode = ortZuKuerzel(u.ende.bis_ort);
+    const endeVonCode = ortZuKuerzel(u.ende.von_ort);
+    const gegenCode = gegenEndstelle(u.linie, endeVonCode, dow) || endeBisCode;
+
+    if (i > 0) lines.push("");
+    lines.push(`${vonCode.padEnd(6)}${u.start.zeit}  ${u.linie.padStart(2)}  ${nachCode}`);
+    lines.push(`      => ${u.nr}`);
+    lines.push(`${endeBisCode.padEnd(6)}${u.ende.zeit}  ${u.linie.padStart(2)}  ${gegenCode}`);
+    if (u.pause_danach) lines.push("\n      ☕ Pause");
+  }
+
+  lines.push("─".repeat(24));
+  if (startZeit && endeZeit) {
+    const diff = zeitZuMinuten(endeZeit) - zeitZuMinuten(startZeit);
+    lines.push(`${startZeit} – ${endeZeit}  (${minutenZuDauer(diff)})`);
+  }
+  return lines.join("\n");
+}
+
+function renderDetailFallback(dienstId, datum, wt, errorMsg) {
+  const dienst = state.services.find(s =>
+    s.id === dienstId && parseInt(s.day) === parseInt(datum.split(".")[0])
+  );
+  document.getElementById("detailBody").innerHTML = `
+    <div class="empty-state">
+      <div class="empty-icon">ℹ️</div>
+      <div class="empty-title">Dienst ${dienstId}</div>
+      <div class="empty-sub">${dienst?.time || "Zeit nicht verfügbar"}${errorMsg ? "<br><small>"+errorMsg+"</small>" : ""}</div>
+    </div>
+    <div class="action-row">
+      <button class="btn-action btn-notiz" onclick="openShortcut()">⚡ iOS Shortcut</button>
+    </div>`;
+}
+
+function closeDetail() {
+  document.getElementById("detailPanel").classList.remove("show");
+  state.selectedDienst = null;
+  state.rawText = "";
+}
+
+function copyToClipboard() {
+  if (!state.rawText) { showToast("Kein Text verfügbar"); return; }
+  navigator.clipboard.writeText(state.rawText).then(() => {
+    showToast("✓ Text kopiert");
+  }).catch(() => {
+    const ta = document.createElement("textarea");
+    ta.value = state.rawText;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    showToast("✓ Text kopiert");
+  });
+}
+
+function openInNotizen() {
+  if (!state.rawText) { showToast("Kein Text verfügbar"); return; }
+  const url = `shortcuts://run-shortcut?name=DienstplanSpeichern&input=text&text=${encodeURIComponent(state.rawText)}`;
+  window.location.href = url;
+  showToast("Öffne Shortcut…");
+}
+
+function openShortcut() {
+  if (!state.rawText) {
+    const url = `shortcuts://run-shortcut?name=DienstplanSpeichern`;
+    window.location.href = url;
+  } else {
+    openInNotizen();
+  }
+}
+
+async function changeMonth(dir) {
+  state.currentMonth += dir;
+  if (state.currentMonth > 11) { state.currentMonth = 0; state.currentYear++; }
+  if (state.currentMonth < 0) { state.currentMonth = 11; state.currentYear--; }
+  await loadDienstplan();
+}
+
+function showError(msg) {
+  const el = document.getElementById("loginError");
+  el.textContent = msg;
+  el.classList.add("show");
+}
+function hideError() { document.getElementById("loginError").classList.remove("show"); }
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2500);
+}
+
+document.getElementById("passwordInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") doLogin();
+});
+document.getElementById("usernameInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") document.getElementById("passwordInput").focus();
+});
+</script>
+</body>
+</html>
